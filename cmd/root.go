@@ -29,7 +29,9 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "agenda",
 	Short: "An agenda management cli app.",
-	Long: fmt.Sprintf("Usage: %v {help|register|cm}", os.Args[0]),
+	Long: fmt.Sprintf(`An agenda management cli app.
+
+Usage: %v {help|register|cm}`, os.Args[0]),
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },
