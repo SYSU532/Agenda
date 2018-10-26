@@ -1,6 +1,9 @@
 package entity
 
-import "database/sql"
+import (
+	"database/sql"
+	
+)
 
 var userDB, meetingDB *sql.DB
 var addUserStmt, getUserStmt *sql.Stmt
