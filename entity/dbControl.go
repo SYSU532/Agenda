@@ -6,14 +6,16 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"os"
 	"path/filepath"
 	"time"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var agendaDB *sql.DB
 var addUserStmt, getUserByNameStmt, getUserByEmailStmt *sql.Stmt
+
 const dbPath = "./data"
 const dbFile = "agenda.db"
 
@@ -28,7 +30,6 @@ func init() {
 	//Open DB
 	agendaDB, err = sql.Open("sqlite3", filepath.Join(dbPath, dbFile))
 	checkErr(err)
-
 
 	//Init table if not exist.
 	_, err = agendaDB.Exec(initUserTable)
@@ -51,7 +52,7 @@ func checkErr(err error) {
 	}
 }
 
-func LoginUser(username, password string) error{
+func LoginUser(username, password string) error {
 	result, err := getUserByNameStmt.Query(username)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v", err)
