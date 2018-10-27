@@ -14,6 +14,9 @@ func init() {
 	registerCmd.Flags().StringVarP(&createUserName, "username", "u", "", "The username of the new user.")
 	registerCmd.Flags().StringVarP(&createUserPass, "password", "p", "", "The password of the new user.")
 	registerCmd.Flags().StringVarP(&createUserEmail, "email", "e", "", "The email of the new user.")
+	registerCmd.MarkFlagRequired("username")
+	registerCmd.MarkFlagRequired("password")
+	registerCmd.MarkFlagRequired("email")
 }
 
 var registerCmd = &cobra.Command{
@@ -21,10 +24,11 @@ var registerCmd = &cobra.Command{
 	Short: "Register a new user",
 	Long:  fmt.Sprintf(`Register a new user with the input username, password and email.
 
-Usage: %v register {help | -uUserName –password pass –email=a@xxx.com}`, os.Args[0]),
+Usage: %v register -uUserName –password pass –email=a@xxx.com`, os.Args[0]),
 
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Hugo Static Site Generator v0.9 -- HEAD")
+		
+
 	},
 
 

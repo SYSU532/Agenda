@@ -1,4 +1,4 @@
-// Copyright © 2018 Miguel Chan <vvchan@outlook.com>
+// Copyright © 2018 NAME HERE <EMAIL ADDRESS>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,12 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package cmd
 
 import (
-	"github.com/SYSU532/agenda/cmd"
+	"fmt"
+	"os"
+
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	cmd.Execute()
+// helpCmd represents the help command
+var helpCmd = &cobra.Command{
+	Use:   "help",
+	Short: "Display help messages of Agenda.",
+	Long: fmt.Sprintf(`Agenda is an agenda management cli app.
+
+Usage: %v {help|register|cm}`, os.Args[0]),
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("help called")
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(helpCmd)
+
 }
