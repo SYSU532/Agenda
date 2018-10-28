@@ -16,8 +16,11 @@ package main
 
 import (
 	"github.com/SYSU532/agenda/cmd"
+	"github.com/SYSU532/agenda/entity"
 )
 
 func main() {
 	cmd.Execute()
+
+	entity.Close()
 }

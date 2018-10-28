@@ -55,7 +55,7 @@ Usage: %v register -uUserName –password pass –email=a@xxx.com`, os.Args[0]),
 			createUserEmail, _ = reader.ReadString('\n')
 			createUserEmail = createUserEmail[:len(createUserEmail)-1]
 		}
-		fmt.Println("Creating User...")
+		fmt.Println("\nCreating User...")
 		fmt.Printf("Username: %v\n", createUserName)
 		fmt.Printf("Password: %v\n", createUserPass)
 		fmt.Printf("Email: %v\n", createUserEmail)

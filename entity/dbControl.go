@@ -36,6 +36,8 @@ func init() {
 	checkErr(err)
 	_, err = agendaDB.Exec(initMeetingTable)
 	checkErr(err)
+	_, err = agendaDB.Exec(initParticipantTable)
+	checkErr(err)
 
 	//Prepare statements
 	addUserStmt, err = agendaDB.Prepare(addUser)
@@ -110,4 +112,9 @@ func checkUserDuplicate(username, email string) error {
 		return errors.New("email already exists")
 	}
 	return nil
+}
+
+
+func Close() {
+	agendaDB.Close()
 }
