@@ -6,6 +6,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"github.com/SYSU532/agenda/entity"
 
 	"github.com/spf13/cobra"
@@ -16,8 +17,8 @@ var targetUserName, targetEmail string
 func init() {
 	rootCmd.AddCommand(userlistCmd)
 
-	userlistCmd.Flags().stringVarP(&targetUserName, "username", "u", "The username for searching.");
-	userlistCmd.Flags().stringVarP(&targetEmail, "email", "e", "The email for searching.");
+	userlistCmd.Flags().StringVarP(&targetUserName, "username", "u", "", "The username for searching.");
+	userlistCmd.Flags().StringVarP(&targetEmail, "email", "e", "", "The email for searching.");
 }
 
 var userlistCmd = &cobra.Command{
@@ -31,9 +32,15 @@ Usage: %v userlist [-uUserName] [-eEmail]`, os.Args[0]),
 		result, err := entity.GetUserList(targetUserName, targetEmail);
 		if err != nil {
 			fmt.Println("FAIL to print user list!")
-		} else {
+		} else if len(result) == 0 {
+			if targetUserName == "" && targetEmail == "" {
+				fmt.Println("No any user in the DataBase!")
+			} else {
+				fmt.Println("No any user satisfies your searcing conditions!")
+			}
+		}else {
 			for _, ele := range result {
-				fmt.Printf("UserName: %v  Email: %v \n", ele.name, ele.email);
+				fmt.Printf("UserName: %v  Email: %v \n", ele.Username, ele.Email);
 			}
 		}
 	},

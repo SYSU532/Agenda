@@ -14,10 +14,16 @@ import (
 )
 
 var agendaDB *sql.DB
-var addUserStmt, getUserByNameStmt, getUserByEmailStmt *sql.Stmt
+var addUserStmt, deleteUserStmt, getUserByNameStmt, getUserByEmailStmt, getAllUserStmt *sql.Stmt
 
 const dbPath = "./data"
 const dbFile = "agenda.db"
+
+// Print finding user info structure
+type FindUserInfo struct {
+	Username string 
+	Email string
+}
 
 func init() {
 	var err error
@@ -42,9 +48,13 @@ func init() {
 	//Prepare statements
 	addUserStmt, err = agendaDB.Prepare(addUser)
 	checkErr(err)
+	deleteUserStmt, err = agendaDB.Prepare(deleteUser)
+	checkErr(err)
 	getUserByNameStmt, err = agendaDB.Prepare(getUserByName)
 	checkErr(err)
 	getUserByEmailStmt, err = agendaDB.Prepare(getUserByEmail)
+	checkErr(err)
+	getAllUserStmt, err = agendaDB.Prepare(getAllUser);
 
 }
 
@@ -54,6 +64,7 @@ func checkErr(err error) {
 	}
 }
 
+// Login user with username and password
 func LoginUser(username, password string) error {
 	result, err := getUserByNameStmt.Query(username)
 	if err != nil {
@@ -71,6 +82,7 @@ func LoginUser(username, password string) error {
 			return errors.New("database scan error")
 		}
 		if pass == hashStr {
+			SetCurrentUser(username, hashStr)
 			return nil
 		} else {
 			return errors.New("wrong password")
@@ -80,6 +92,7 @@ func LoginUser(username, password string) error {
 	}
 }
 
+// Create user with username and password
 func AddUser(username, password, email string) error {
 	err := checkUserDuplicate(username, email)
 	if err != nil {
@@ -96,6 +109,7 @@ func AddUser(username, password, email string) error {
 	return nil
 }
 
+// Check user creation is duplicate or not
 func checkUserDuplicate(username, email string) error {
 	result, err := getUserByNameStmt.Query(username)
 	if err != nil {
@@ -114,6 +128,43 @@ func checkUserDuplicate(username, email string) error {
 	return nil
 }
 
+// Delete current user (Only be invoked in login state)
+func DeleteUser() (string, error) {
+	curUser, err := GetCurrentUser()
+	fmt.Println(curUser)
+	if err != nil || curUser.Username == "" {
+		return "", errors.New("FAIL to delete current user, not in LogIn state!")
+	}
+	_, err = deleteUserStmt.Query(curUser.Username)
+	if err != nil {
+		return "", errors.New("FAIL to delete current user, something wrong with the DB!")
+	}
+	return curUser.Username, nil
+}
+
+// Get all users with special conditions
+func GetUserList(username string, email string) ([]FindUserInfo, error) {
+	result, err := getAllUserStmt.Query()
+	var (
+		output []FindUserInfo
+		uid int
+		uname, upass, uemail string
+		utime time.Time
+	)
+	// Start checking with conditions
+	if username == "" {
+		if email != "" {
+			result, err = getUserByEmailStmt.Query(email)
+		}
+	} else {
+		result, err = getUserByNameStmt.Query(username)
+	}
+	for result.Next() {
+		result.Scan(&uid, &uname, &upass, &uemail, &utime)
+		output = append(output, FindUserInfo{Username: uname, Email: uemail})
+	}
+	return output, err
+}
 
 func Close() {
 	agendaDB.Close()

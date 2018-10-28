@@ -6,6 +6,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"github.com/SYSU532/agenda/entity"
 
 	"github.com/spf13/cobra"
@@ -24,12 +25,12 @@ var userdeleteCmd = &cobra.Command{
 Usage: %v userdelete`, os.Args[0]),
 
 	Run: func(cmd *cobra.Command, args []string) {
-		// Delete the user by current user info
-		err := entity.DeleteCurrUser()
+		// Delete the current user, do not need any inpit
+		name, err := entity.DeleteUser()
 		if err != nil {
-			fmt.Println("FAIL to delete current user!")
+			fmt.Println(err);
 		}else {
-			fmt.Println("Successfully delete current user!")
+			fmt.Println("Successfully delete current user: %v !", name)
 		}
 	},
 }

@@ -32,11 +32,17 @@ const initParticipantTable =
 const addUser =
 	`INSERT INTO users(username, password, email, createdTime) values(?, ?, ?, ?)`
 
+const deleteUser =
+	`DELETE FROM users WHERE username=?`
+
 const getUserByName =
 	`SELECT * FROM users WHERE username=?`
 
 const getUserByEmail =
 	`SELECT * FROM users WHERE email=?`
+
+const getAllUser = 
+	`SELECT * FROM users`
 
 
 
