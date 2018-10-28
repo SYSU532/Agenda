@@ -2,3 +2,4 @@
 .vscode
 db/*data/agenda.db
 data
+data/agenda.db
