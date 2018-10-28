@@ -1,50 +1,35 @@
-// Copyright © 2018 NAME HERE <EMAIL ADDRESS>
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+*  CMD -- User Delete
+*/
 
 package cmd
 
 import (
 	"fmt"
+	"github.com/SYSU532/agenda/entity"
 
 	"github.com/spf13/cobra"
 )
 
-// userdeleteCmd represents the userdelete command
-var userdeleteCmd = &cobra.Command{
-	Use:   "userdelete",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("userdelete called")
-	},
-}
-
 func init() {
 	rootCmd.AddCommand(userdeleteCmd)
+	// Do not need any pflags
+}
 
-	// Here you will define your flags and configuration settings.
+var userdeleteCmd = &cobra.Command{
+	Use:   "userdelete",
+	Short: "Delete the user itself",
+	Long: fmt.Sprintf(`Delete the user if the user choose to do so.
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// userdeleteCmd.PersistentFlags().String("foo", "", "A help for foo")
+Usage: %v userdelete`, os.Args[0]),
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// userdeleteCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	Run: func(cmd *cobra.Command, args []string) {
+		// Delete the user by current user info
+		err := entity.DeleteCurrUser()
+		if err != nil {
+			fmt.Println("FAIL to delete current user!")
+		}else {
+			fmt.Println("Successfully delete current user!")
+		}
+	},
 }
