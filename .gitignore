@@ -3,3 +3,4 @@
 db/*data/agenda.db
 data
 data/agenda.db
+.DS_Store
