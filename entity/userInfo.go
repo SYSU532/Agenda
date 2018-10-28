@@ -53,7 +53,7 @@ func SetCurrentUser(username, password string) error {
 	return nil
 }
 
-func ClearCurrentUser() error{
+func ClearCurrentUser() error {
 	infoFile, err := os.Create(path.Join(userInfoPath, userInfoFilename))
 	if err != nil {
 		return errors.New("fail to open current user file")
@@ -61,10 +61,9 @@ func ClearCurrentUser() error{
 	defer infoFile.Close()
 	JsonEncoder := json.NewEncoder(infoFile)
 
-	err = JsonEncoder.Encode(struct {}{})
+	err = JsonEncoder.Encode(struct{}{})
 	if err != nil {
 		return errors.New("fail to convert user info to Json")
 	}
 	return nil
 }
-

@@ -1,6 +1,6 @@
 /*
 * CMD -- Login
-*/
+ */
 
 package cmd
 
@@ -23,7 +23,7 @@ var loginUsername, loginPassword string
 var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Login User.",
-	Long: `Login user in order to perform operations like creating meetings, view current meetings, etc.`,
+	Long:  `Login user in order to perform operations like creating meetings, view current meetings, etc.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		reader := bufio.NewReader(os.Stdin)
 		if loginUsername == "" {
@@ -62,9 +62,9 @@ func init() {
 
 func LoginAgendaTerminal(name string) {
 	var (
-		input string
+		input  string
 		output bytes.Buffer
-		items []string
+		items  []string
 	)
 	s := fmt.Sprintf("%s@Agenda~: ", name)
 	for {
@@ -74,7 +74,7 @@ func LoginAgendaTerminal(name string) {
 		if items[0] == "exit" {
 			//entity.ClearCurrentUser()
 			break
-		} else if items[0] == "login"{
+		} else if items[0] == "login" {
 			fmt.Println("Do not login again in Agenda Termial!")
 		} else {
 			cmd := exec.Command(os.Args[0], input)

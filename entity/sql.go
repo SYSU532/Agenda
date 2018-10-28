@@ -1,7 +1,6 @@
 package entity
 
-const initUserTable =
-	`CREATE TABLE IF NOT EXISTS "users" (
+const initUserTable = `CREATE TABLE IF NOT EXISTS "users" (
     "uid" INTEGER PRIMARY KEY AUTOINCREMENT,
     "username" VARCHAR(64) UNIQUE NOT NULL,
 	"password" CHAR(44) NOT NULL,
@@ -9,8 +8,7 @@ const initUserTable =
     "createdTime" DATE NOT NULL
 );`
 
-const initMeetingTable =
-	`CREATE TABLE IF NOT EXISTS "meetings"(
+const initMeetingTable = `CREATE TABLE IF NOT EXISTS "meetings"(
 	"mid" INTEGER PRIMARY KEY AUTOINCREMENT,
 	"title" VARCHAR(100) UNIQUE NOT NULL,
 	"creatorid" INTEGER NOT NULL,
@@ -19,32 +17,19 @@ const initMeetingTable =
 	FOREIGN KEY (creatorid) REFERENCES users(uid)
 );`
 
-
-const initParticipantTable =
-	`CREATE TABLE IF NOT EXISTS "participants"(
+const initParticipantTable = `CREATE TABLE IF NOT EXISTS "participants"(
 	"uid" INTEGER,
 	"mid" INTEGER,
 	FOREIGN KEY(uid) REFERENCES users(uid),
 	FOREIGN KEY(mid) REFERENCES meetings(mid)
 );`
 
+const addUser = `INSERT INTO users(username, password, email, createdTime) values(?, ?, ?, ?)`
 
-const addUser =
-	`INSERT INTO users(username, password, email, createdTime) values(?, ?, ?, ?)`
+const deleteUser = `DELETE FROM users WHERE username=?`
 
-const deleteUser =
-	`DELETE FROM users WHERE username=?`
+const getUserByName = `SELECT * FROM users WHERE username=?`
 
-const getUserByName =
-	`SELECT * FROM users WHERE username=?`
+const getUserByEmail = `SELECT * FROM users WHERE email=?`
 
-const getUserByEmail =
-	`SELECT * FROM users WHERE email=?`
-
-const getAllUser = 
-	`SELECT * FROM users`
-
-
-
-
-
+const getAllUser = `SELECT * FROM users`

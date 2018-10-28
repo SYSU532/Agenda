@@ -1,13 +1,13 @@
 /*
-*  CMD -- User List 
-*/
+*  CMD -- User List
+ */
 
 package cmd
 
 import (
 	"fmt"
-	"os"
 	"github.com/SYSU532/agenda/entity"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -17,8 +17,8 @@ var targetUserName, targetEmail string
 func init() {
 	rootCmd.AddCommand(userlistCmd)
 
-	userlistCmd.Flags().StringVarP(&targetUserName, "username", "u", "", "The username for searching.");
-	userlistCmd.Flags().StringVarP(&targetEmail, "email", "e", "", "The email for searching.");
+	userlistCmd.Flags().StringVarP(&targetUserName, "username", "u", "", "The username for searching.")
+	userlistCmd.Flags().StringVarP(&targetEmail, "email", "e", "", "The email for searching.")
 }
 
 var userlistCmd = &cobra.Command{
@@ -29,7 +29,7 @@ var userlistCmd = &cobra.Command{
 Usage: %v userlist [-uUserName] [-eEmail]`, os.Args[0]),
 
 	Run: func(cmd *cobra.Command, args []string) {
-		result, err := entity.GetUserList(targetUserName, targetEmail);
+		result, err := entity.GetUserList(targetUserName, targetEmail)
 		if err != nil {
 			fmt.Println("FAIL to print user list!")
 		} else if len(result) == 0 {
@@ -38,9 +38,9 @@ Usage: %v userlist [-uUserName] [-eEmail]`, os.Args[0]),
 			} else {
 				fmt.Println("No any user satisfies your searcing conditions!")
 			}
-		}else {
+		} else {
 			for _, ele := range result {
-				fmt.Printf("UserName: %v  Email: %v \n", ele.Username, ele.Email);
+				fmt.Printf("UserName: %v  Email: %v \n", ele.Username, ele.Email)
 			}
 		}
 	},

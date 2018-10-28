@@ -21,8 +21,8 @@ const dbFile = "agenda.db"
 
 // Print finding user info structure
 type FindUserInfo struct {
-	Username string 
-	Email string
+	Username string
+	Email    string
 }
 
 func init() {
@@ -138,7 +138,7 @@ func checkUserDuplicate(username, email string) error {
 func DeleteUser() (string, error) {
 	curUser, err := GetCurrentUser()
 	if err != nil || curUser.Username == "" {
-		return "", errors.New("fail to delete current user: not in Login state")
+		return "", errors.New("not in Login state")
 	}
 	_, err = deleteUserStmt.Exec(curUser.Username)
 	if err != nil {
@@ -152,10 +152,10 @@ func GetUserList(username string, email string) ([]FindUserInfo, error) {
 	result, err := getAllUserStmt.Query()
 	defer result.Close()
 	var (
-		output []FindUserInfo
-		uid int
+		output               []FindUserInfo
+		uid                  int
 		uname, upass, uemail string
-		utime time.Time
+		utime                time.Time
 	)
 	// Start checking with conditions
 	if username == "" {

@@ -13,6 +13,7 @@ import (
 )
 
 var createUserName, createUserPass, createUserEmail string
+
 const emailRegex = "^([A-Za-z0-9]+)@([a-z0-9]+).([a-z]+)$"
 const usernameRegex = "^[A-Za-z0-9]+$"
 const passwordRegex = "^.{6,}$"

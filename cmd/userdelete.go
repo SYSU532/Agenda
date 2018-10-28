@@ -1,13 +1,13 @@
 /*
 *  CMD -- User Delete
-*/
+ */
 
 package cmd
 
 import (
 	"fmt"
-	"os"
 	"github.com/SYSU532/agenda/entity"
+	"os"
 
 	"github.com/spf13/cobra"
 )
