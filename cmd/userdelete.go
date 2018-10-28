@@ -32,5 +32,6 @@ Usage: %v userdelete`, os.Args[0]),
 		} else {
 			fmt.Printf("Successfully delete current user: %v!\n", name)
 		}
+		entity.ClearCurrentUser()
 	},
 }

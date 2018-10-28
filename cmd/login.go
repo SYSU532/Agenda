@@ -6,13 +6,13 @@ package cmd
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"github.com/SYSU532/agenda/entity"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 	"os"
 	"os/exec"
-	"bytes"
 	"strings"
 	"syscall"
 )
@@ -49,7 +49,7 @@ var loginCmd = &cobra.Command{
 			os.Exit(0)
 		}
 		fmt.Printf("Login as user %v succeeded.\n", loginUsername)
-		LoginAgendaTerminal(loginUsername)
+		//LoginAgendaTerminal(loginUsername)
 	},
 }
 

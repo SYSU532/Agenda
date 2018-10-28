@@ -37,6 +37,9 @@ func init() {
 	agendaDB, err = sql.Open("sqlite3", filepath.Join(dbPath, dbFile))
 	checkErr(err)
 
+	//Solve "db is locked" error
+	agendaDB.Exec("PRAGMA journal_mode=WAL;")
+
 	//Init table if not exist.
 	_, err = agendaDB.Exec(initUserTable)
 	checkErr(err)
@@ -68,6 +71,7 @@ func checkErr(err error) {
 // Login user with username and password
 func LoginUser(username, password string) error {
 	result, err := getUserByNameStmt.Query(username)
+	defer result.Close()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 	}
@@ -83,7 +87,6 @@ func LoginUser(username, password string) error {
 			return errors.New("database scan error")
 		}
 		if pass == hashStr {
-			SetCurrentUser(username, hashStr)
 			return nil
 		} else {
 			return errors.New("wrong password")
@@ -119,7 +122,9 @@ func checkUserDuplicate(username, email string) error {
 	if result.Next() {
 		return errors.New("username already exists")
 	}
+	result.Close()
 	result, err = getUserByEmailStmt.Query(email)
+	defer result.Close()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 	}
@@ -137,7 +142,7 @@ func DeleteUser() (string, error) {
 	}
 	_, err = deleteUserStmt.Exec(curUser.Username)
 	if err != nil {
-		return "", errors.New("fail to delete current user: something wrong with the DB")
+		return "", err
 	}
 	return curUser.Username, nil
 }
@@ -145,6 +150,7 @@ func DeleteUser() (string, error) {
 // Get all users with special conditions
 func GetUserList(username string, email string) ([]FindUserInfo, error) {
 	result, err := getAllUserStmt.Query()
+	defer result.Close()
 	var (
 		output []FindUserInfo
 		uid int
