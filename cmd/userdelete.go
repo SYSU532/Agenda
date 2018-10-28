@@ -28,9 +28,9 @@ Usage: %v userdelete`, os.Args[0]),
 		// Delete the current user, do not need any inpit
 		name, err := entity.DeleteUser()
 		if err != nil {
-			fmt.Println(err);
-		}else {
-			fmt.Println("Successfully delete current user: %v !", name)
+			fmt.Fprintf(os.Stderr, "Error when deleting user: %v\n", err)
+		} else {
+			fmt.Printf("Successfully delete current user: %v!\n", name)
 		}
 	},
 }

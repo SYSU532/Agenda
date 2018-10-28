@@ -54,7 +54,8 @@ func init() {
 	checkErr(err)
 	getUserByEmailStmt, err = agendaDB.Prepare(getUserByEmail)
 	checkErr(err)
-	getAllUserStmt, err = agendaDB.Prepare(getAllUser);
+	getAllUserStmt, err = agendaDB.Prepare(getAllUser)
+	checkErr(err)
 
 }
 
@@ -131,13 +132,12 @@ func checkUserDuplicate(username, email string) error {
 // Delete current user (Only be invoked in login state)
 func DeleteUser() (string, error) {
 	curUser, err := GetCurrentUser()
-	fmt.Println(curUser)
 	if err != nil || curUser.Username == "" {
-		return "", errors.New("FAIL to delete current user, not in LogIn state!")
+		return "", errors.New("fail to delete current user: not in Login state")
 	}
-	_, err = deleteUserStmt.Query(curUser.Username)
+	_, err = deleteUserStmt.Exec(curUser.Username)
 	if err != nil {
-		return "", errors.New("FAIL to delete current user, something wrong with the DB!")
+		return "", errors.New("fail to delete current user: something wrong with the DB")
 	}
 	return curUser.Username, nil
 }
