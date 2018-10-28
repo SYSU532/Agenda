@@ -1,10 +1,13 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/SYSU532/agenda/entity"
+	"golang.org/x/crypto/ssh/terminal"
 	"os"
 	"regexp"
+	"syscall"
 
 	"github.com/spf13/cobra"
 )
@@ -20,9 +23,6 @@ func init() {
 	registerCmd.Flags().StringVarP(&createUserName, "username", "u", "", "The username of the new user.")
 	registerCmd.Flags().StringVarP(&createUserPass, "password", "p", "", "The password of the new user.")
 	registerCmd.Flags().StringVarP(&createUserEmail, "email", "e", "", "The email of the new user.")
-	registerCmd.MarkFlagRequired("username")
-	registerCmd.MarkFlagRequired("password")
-	registerCmd.MarkFlagRequired("email")
 }
 
 func checkFormat(origin, regexFormat string) bool {
@@ -38,6 +38,23 @@ var registerCmd = &cobra.Command{
 Usage: %v register -uUserName –password pass –email=a@xxx.com`, os.Args[0]),
 
 	Run: func(cmd *cobra.Command, args []string) {
+		reader := bufio.NewReader(os.Stdin)
+		if createUserName == "" {
+			fmt.Print("Enter username: ")
+			createUserName, _ = reader.ReadString('\n')
+			//trim \n
+			createUserName = createUserName[:len(createUserName)-1]
+		}
+		if createUserPass == "" {
+			fmt.Print("Enter password: ")
+			bytePass, _ := terminal.ReadPassword(int(syscall.Stdin))
+			createUserPass = string(bytePass)
+		}
+		if createUserEmail == "" {
+			fmt.Print("\nEnter Email: ")
+			createUserEmail, _ = reader.ReadString('\n')
+			createUserEmail = createUserEmail[:len(createUserEmail)-1]
+		}
 		fmt.Println("Creating User...")
 		fmt.Printf("Username: %v\n", createUserName)
 		fmt.Printf("Password: %v\n", createUserPass)
@@ -52,15 +69,15 @@ Usage: %v register -uUserName –password pass –email=a@xxx.com`, os.Args[0]),
 			validFormat = false
 		}
 		if !checkFormat(createUserEmail, emailRegex) {
-			fmt.Println("Password does not fit the required format!")
+			fmt.Println("Email does not fit the required format!")
 			validFormat = false
 		}
 		if validFormat {
 			err := entity.AddUser(createUserName, createUserPass, createUserEmail)
-			if err != nil {
+			if err == nil {
 				fmt.Println("Successfully created user!")
 			} else {
-				println(err)
+				fmt.Println(err)
 				fmt.Println("FAIL to create user!")
 			}
 		} else {

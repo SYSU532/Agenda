@@ -55,7 +55,7 @@ func checkErr(err error) {
 func LoginUser(username, password string) error {
 	result, err := getUserByNameStmt.Query(username)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v", err)
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 	}
 	if result.Next() {
 		passHash := sha256.Sum256([]byte(password))
@@ -65,7 +65,7 @@ func LoginUser(username, password string) error {
 		var ctime time.Time
 		err = result.Scan(&uid, &uname, &pass, &email, &ctime)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v", err)
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			return errors.New("database scan error")
 		}
 		if pass == hashStr {
@@ -79,7 +79,7 @@ func LoginUser(username, password string) error {
 }
 
 func AddUser(username, password, email string) error {
-	err := checkUserDuplicate(username, password)
+	err := checkUserDuplicate(username, email)
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func AddUser(username, password, email string) error {
 	datetime := time.Now().Format(time.RFC3339)
 	_, err = addUserStmt.Exec(username, hashStr, email, datetime)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v", err)
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		return errors.New("database error when adding user")
 	}
 	return nil
@@ -97,14 +97,14 @@ func AddUser(username, password, email string) error {
 func checkUserDuplicate(username, email string) error {
 	result, err := getUserByNameStmt.Query(username)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v", err)
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 	}
 	if result.Next() {
 		return errors.New("username already exists")
 	}
 	result, err = getUserByEmailStmt.Query(email)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v", err)
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 	}
 	if result.Next() {
 		return errors.New("email already exists")
