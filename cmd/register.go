@@ -3,18 +3,19 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-	"github.com/SYSU532/agenda/entity"
-	"golang.org/x/crypto/ssh/terminal"
 	"os"
 	"regexp"
 	"syscall"
+
+	"github.com/SYSU532/agenda/entity"
+	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/spf13/cobra"
 )
 
 var createUserName, createUserPass, createUserEmail string
 
-const emailRegex = "^([A-Za-z0-9]+)@([a-z0-9]+).([a-z]+)$"
+const emailRegex = "^([A-Za-z0-9]+)@([a-z0-9]+)([.])([a-z]+)$"
 const usernameRegex = "^[A-Za-z0-9]+$"
 const passwordRegex = "^.{6,}$"
 
