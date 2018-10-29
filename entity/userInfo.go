@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"os"
@@ -28,6 +29,9 @@ func GetCurrentUser() (*UserInfo, error) {
 	if err != nil {
 		return nil, errors.New("fail to convert Json file to user info")
 	}
+	pass64, _ := base64.StdEncoding.DecodeString(info.Password)
+	info.Password = string(pass64)
+
 	if info.Username == "" || info.Password == "" {
 		return nil, errors.New("no current user")
 	}
@@ -46,7 +50,8 @@ func SetCurrentUser(username, password string) error {
 	defer infoFile.Close()
 	JsonEncoder := json.NewEncoder(infoFile)
 
-	err = JsonEncoder.Encode(&UserInfo{username, password})
+	pass64 := base64.StdEncoding.EncodeToString([]byte(password))
+	err = JsonEncoder.Encode(&UserInfo{username, pass64})
 	if err != nil {
 		return errors.New("fail to convert user info to Json")
 	}

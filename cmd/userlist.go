@@ -34,13 +34,15 @@ Usage: %v userlist [-uUserName] [-eEmail]`, os.Args[0]),
 			fmt.Println("FAIL to print user list!")
 		} else if len(result) == 0 {
 			if targetUserName == "" && targetEmail == "" {
-				fmt.Println("No any user in the DataBase!")
+				fmt.Println("There is no user in the DataBase!")
 			} else {
-				fmt.Println("No any user satisfies your searcing conditions!")
+				fmt.Println("There is no user satisfying your searching conditions!")
 			}
 		} else {
+			fmt.Printf("|%-20v|%-20v|\n", "Username", "Email")
+			fmt.Println("|--------------------|--------------------|")
 			for _, ele := range result {
-				fmt.Printf("UserName: %v  Email: %v \n", ele.Username, ele.Email)
+				fmt.Printf("|%-20v|%-20v|\n", ele.Username, ele.Email)
 			}
 		}
 	},
