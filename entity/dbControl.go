@@ -477,7 +477,6 @@ func FindMeetingByTitle(title string) ([]Meeting, error) {
 	curName := curInfo.Username
 	format := "2006-01-02 15:04"
 	result, err := getTitleMeetingStmt.Query(title)
-	defer result.Close()
 	if err != nil {
 		return output, err
 	}
@@ -486,19 +485,23 @@ func FindMeetingByTitle(title string) ([]Meeting, error) {
 			title_, partName, creaName string
 			start, end                 time.Time
 			mid, cid, uid              int
+			uidTemp                    []int
 		)
 		result.Scan(&mid, &title_, &cid, &start, &end)
 		output = append(output, Meeting{StartTime: start.Format(format), EndTime: end.Format(format), Title: title_})
+		result.Close()
 		result1, err1 := getAllParticipantsStmt.Query(mid)
-		defer result1.Close()
 		if err1 != nil {
-			return output, err1
+			return []Meeting{}, err1
 		}
 		// Adding participants of meeting
 		for result1.Next() {
 			result1.Scan(&uid)
-			result2, _ := getUserByIDStmt.Query(uid)
-			defer result2.Close()
+			uidTemp = append(uidTemp, uid)
+		}
+		result1.Close()
+		for _, ele := range uidTemp {
+			result2, _ := getUserByIDStmt.Query(ele)
 			if result2.Next() {
 				result2.Scan(&partName)
 				output[0].Participant = append(output[0].Participant, partName)
@@ -506,10 +509,13 @@ func FindMeetingByTitle(title string) ([]Meeting, error) {
 					inFlag = true
 				}
 			}
+			result2.Close()
 		}
 		// Adding creator of meeting
-		result3, _ := getUserByIDStmt.Query(mid)
-		result3.Scan(&creaName)
+		result3, _ := getUserByIDStmt.Query(cid)
+		if result3.Next() {
+			result3.Scan(&creaName)
+		}
 		output[0].Creator = creaName
 		if creaName == curName {
 			inFlag = true
@@ -530,46 +536,66 @@ func FindMeetingsByTimeInterval(start, end time.Time) ([]Meeting, error) {
 		startTime, endTime        time.Time
 		title, creaName, partName string
 		cFlag, pFlag              bool
-		output                    []Meeting
+		output, tempRes           []Meeting
+		tempMid, tempCid          []int
+		count                     int = 0
 	)
 	curInfo, _ := GetCurrentUser()
 	curName := curInfo.Username
 	format := "2006-01-02 15:04"
 	result, _ := getAllMeetingsStmt.Query()
-	defer result.Close()
+	
 	for result.Next() {
 		cFlag = false
 		pFlag = false
 		result.Scan(&mid, &title, &cid, &startTime, &endTime)
+		tempMid = append(tempMid, mid)
+		tempCid = append(tempCid, cid)
+		tempRes = append(tempRes, Meeting{Title: title, StartTime: startTime.Format(format), EndTime: endTime.Format(format)})
+	}
+	result.Close()
+	for i, ele := range tempRes {
 		// Judging the meeting is within the providing interval or not
-		if !(startTime.Equal(start) || startTime.After(start)) && (endTime.Equal(end) || endTime.Before(end)) {
+		st, _ := time.Parse(format, ele.StartTime)
+		ed, _ := time.Parse(format, ele.EndTime)
+		if !(st.Equal(start) || st.After(start)) && (ed.Equal(end) || ed.Before(end)) {
 			continue
 		}
 		// JUdging creator and participant of this meeting
-		result1, _ := getUserByIDStmt.Query(mid)
-		defer result1.Close()
-		result1.Scan(&creaName)
+		result1, _ := getUserByIDStmt.Query(tempCid[i])
+		if result1.Next() {
+			result1.Scan(&creaName)
+		}
 		if curName == creaName {
 			cFlag = true
 		}
-		result2, _ := getAllParticipantsStmt.Query(mid)
-		defer result2.Close()
-		var partArr []string
+		result1.Close()
+		result2, _ := getAllParticipantsStmt.Query(tempMid[i])
+		var (
+			partArr []string
+			uidArr []int
+		)
 		for result2.Next() {
 			result2.Scan(&uid)
-			result3, _ := getUserByIDStmt.Query(uid)
-			defer result3.Close()
-			result3.Scan(&partName)
+			uidArr = append(uidArr, uid)
+		}
+		result2.Close()
+		for _, n := range uidArr {
+			result3, _ := getUserByIDStmt.Query(n)
+			if result3.Next() {
+				result3.Scan(&partName)
+			}
 			if partName == curName {
 				pFlag = true
 			}
 			partArr = append(partArr, partName)
 		}
 		if cFlag || pFlag {
-			output = append(output, Meeting{Creator: creaName, Title: title, StartTime: startTime.Format(format), EndTime: endTime.Format(format)})
-			for _, ele := range partArr {
-				output[0].Participant = append(output[0].Participant, ele)
+			output = append(output, Meeting{Creator: creaName, Title: ele.Title, StartTime: ele.StartTime, EndTime: ele.EndTime})
+			for _, el := range partArr {
+				output[count].Participant = append(output[count].Participant, el)
 			}
+			count++
 		}
 	}
 	return output, nil

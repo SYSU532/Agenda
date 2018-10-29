@@ -75,10 +75,14 @@ Usage: %v fm [-t title -s startTime -e endTime]`, os.Args[0]),
 		fmt.Println("|--------------------|--------------------|--------------------|--------------------|--------------------|")
 		for _, ele := range result {
 			fmt.Printf("|%-20v|%-20v|%-20v|%-20v|", ele.Title, ele.StartTime, ele.EndTime, ele.Creator)
-			for _, pa := range ele.Participant {
-				fmt.Printf("%v, ", pa)
+			var strRes string
+			for i, pa := range ele.Participant {
+				strRes += pa
+				if i != len(ele.Participant)-1 {
+					strRes += ", "
+				}
 			}
-			fmt.Printf("|\n")
+			fmt.Printf("%-20v|\n", strRes)
 		}
 	},
 }
