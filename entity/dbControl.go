@@ -16,6 +16,7 @@ import (
 var agendaDB *sql.DB
 var addUserStmt, deleteUserStmt, getUserByNameStmt, getUserByEmailStmt, getUserByIDStmt, getAllUserStmt *sql.Stmt
 var addMeetingStmt, getPartStmt, getCreatedStmt, getTitleMeetingStmt, addPartStmt, getAllMeetingsStmt *sql.Stmt
+var cancleMeetingStmt, clearParticipantStmt *sql.Stmt
 var getAllParticipantsStmt *sql.Stmt
 
 const dbPath = "./data"
@@ -23,17 +24,17 @@ const dbFile = "agenda.db"
 
 // Print finding user info structure
 type FindUserInfo struct {
-	uid int
+	uid      int
 	Username string
 	Email    string
 }
 
 // Meeting structure
 type Meeting struct {
-	StartTime string
-	EndTime string
-	Title string
-	Creator string
+	StartTime   string
+	EndTime     string
+	Title       string
+	Creator     string
 	Participant []string
 }
 
@@ -86,6 +87,10 @@ func init() {
 	getAllMeetingsStmt, err = agendaDB.Prepare(getAllMeetings)
 	checkErr(err)
 	getAllParticipantsStmt, err = agendaDB.Prepare(getAllParticipantsOfMeeting)
+	checkErr(err)
+	cancleMeetingStmt, err = agendaDB.Prepare(cancelMeeting)
+	checkErr(err)
+	clearParticipantStmt, err = agendaDB.Prepare(clearParticipant)
 	checkErr(err)
 }
 
@@ -199,6 +204,34 @@ func GetUserList(username string, email string) ([]FindUserInfo, error) {
 	return output, err
 }
 
+func CancelMeeting(title string) error {
+	var mid int
+	result, err := getTitleMeetingStmt.Query(title)
+	if err != nil {
+		return err
+	}
+	defer result.Close()
+	if result.Next() {
+		var (
+			creatorID     int
+			t, start, end string
+		)
+		result.Scan(&mid, &t, &creatorID, &start, &end)
+	} else {
+		return errors.New("no such meeting")
+	}
+
+	_, err = clearParticipantStmt.Exec(mid)
+	if err != nil {
+		return err
+	}
+	_, err = cancleMeetingStmt.Exec(title)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func AddMeeting(title, creator string, startTime, endTime time.Time) error {
 	if startTime.After(endTime) {
 		return errors.New("start time is after end time")
@@ -260,7 +293,7 @@ func checkUserAvailable(uid int, newStart, newEnd time.Time) (conflictMeeting st
 		if (newStart.Before(endTime) && newStart.After(startTime)) ||
 			(newEnd.Before(endTime) && newEnd.After(startTime)) ||
 			(newStart.Before(startTime) && newEnd.After(endTime)) {
-				return title, nil
+			return title, nil
 		}
 	}
 	result.Close()
@@ -331,11 +364,11 @@ func FindMeetingByTitle(title string) ([]Meeting, error) {
 	if result.Next() {
 		var (
 			title_, partName, creaName string
-			start, end time.Time
-			mid, cid, uid int
+			start, end                 time.Time
+			mid, cid, uid              int
 		)
 		result.Scan(&mid, &title_, &cid, &start, &end)
-		output = append(output, Meeting{StartTime:start.Format(format), EndTime:end.Format(format), Title:title_})
+		output = append(output, Meeting{StartTime: start.Format(format), EndTime: end.Format(format), Title: title_})
 		result1, err1 := getAllParticipantsStmt.Query(mid)
 		defer result1.Close()
 		if err1 != nil {
@@ -373,11 +406,11 @@ func FindMeetingByTitle(title string) ([]Meeting, error) {
 // search meeting by start time and end time
 func FindMeetingsByTimeInterval(start, end time.Time) ([]Meeting, error) {
 	var (
-		mid, cid, uid int
-		startTime, endTime time.Time
+		mid, cid, uid             int
+		startTime, endTime        time.Time
 		title, creaName, partName string
-		cFlag, pFlag bool
-		output []Meeting
+		cFlag, pFlag              bool
+		output                    []Meeting
 	)
 	curInfo, _ := GetCurrentUser()
 	curName := curInfo.Username

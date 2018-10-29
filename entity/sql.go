@@ -38,6 +38,10 @@ const getAllUser = `SELECT * FROM users`
 
 const addMeeting = `INSERT INTO meetings(title, creatorid, start, end) values(?, ?, ?, ?)`
 
+const cancelMeeting = `DELETE FROM meetings WHERE title=?`
+
+const clearParticipant = `DELETE FROM participants WHERE mid=?`
+
 const getParticipating = `SELECT title,start,end FROM meetings WHERE mid IN (SELECT mid FROM participants WHERE uid=?)`
 
 const getCreatedMeeting = `SELECT title,start,end FROM meetings WHERE creatorid=?`
