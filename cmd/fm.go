@@ -13,21 +13,21 @@
 // limitations under the License.
 /*
 * CMD -- Finding Meeting
-*/
+ */
 
 package cmd
 
 import (
-	"fmt"
-	"os"
-	"time"
 	"bufio"
+	"fmt"
 	"github.com/SYSU532/agenda/entity"
 	"github.com/spf13/cobra"
+	"os"
+	"time"
 )
 
 var (
-	fmTitle string
+	fmTitle                string
 	fmStartTime, fmEndTime string
 )
 
@@ -42,7 +42,7 @@ Usage: %v fm [-t title -s startTime -e endTime]`, os.Args[0]),
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
 			result []entity.Meeting
-			err error
+			err    error
 		)
 		format := "2006-01-02 15:04"
 		reader := bufio.NewReader(os.Stdin)
