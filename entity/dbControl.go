@@ -14,13 +14,14 @@ import (
 )
 
 var agendaDB *sql.DB
-var addUserStmt, deleteUserStmt, getUserByNameStmt, getUserByEmailStmt, getAllUserStmt *sql.Stmt
+var addUserStmt, deleteUserStmt, getUserByNameStmt, getUserByEmailStmt, getAllUserStmt, addMeetingStmt, getPartStmt, getCreatedStmt, getTitleMeetingStmt, addPartStmt *sql.Stmt
 
 const dbPath = "./data"
 const dbFile = "agenda.db"
 
 // Print finding user info structure
 type FindUserInfo struct {
+	uid int
 	Username string
 	Email    string
 }
@@ -59,7 +60,16 @@ func init() {
 	checkErr(err)
 	getAllUserStmt, err = agendaDB.Prepare(getAllUser)
 	checkErr(err)
-
+	addMeetingStmt, err = agendaDB.Prepare(addMeeting)
+	checkErr(err)
+	getPartStmt, err = agendaDB.Prepare(getParticipating)
+	checkErr(err)
+	getCreatedStmt, err = agendaDB.Prepare(getCreatedMeeting)
+	checkErr(err)
+	getTitleMeetingStmt, err = agendaDB.Prepare(getMeetingByTitle)
+	checkErr(err)
+	addPartStmt, err = agendaDB.Prepare(addParticipant)
+	checkErr(err)
 }
 
 func checkErr(err error) {
@@ -167,9 +177,126 @@ func GetUserList(username string, email string) ([]FindUserInfo, error) {
 	}
 	for result.Next() {
 		result.Scan(&uid, &uname, &upass, &uemail, &utime)
-		output = append(output, FindUserInfo{Username: uname, Email: uemail})
+		output = append(output, FindUserInfo{uid: uid, Username: uname, Email: uemail})
 	}
 	return output, err
+}
+
+func AddMeeting(title, creator string, startTime, endTime time.Time) error {
+	if startTime.After(endTime) {
+		return errors.New("start time is after end time")
+	}
+	result, err := getUserByNameStmt.Query(creator)
+	var uid int
+	if err != nil {
+		return err
+	}
+	if result.Next() {
+		var name, pass, email, time string
+		result.Scan(&uid, &name, &pass, &email, &time)
+	} else {
+		return errors.New("creator user does not exist when creating meeting")
+	}
+	result.Close()
+
+	conflict, err := checkUserAvailable(uid, startTime, endTime)
+	if err != nil {
+		return err
+	}
+	if conflict != "" {
+		return errors.New("time conflict meeting: " + conflict)
+	}
+
+	if err = checkMeetingDuplicate(title); err != nil {
+		return err
+	}
+
+	_, err = addMeetingStmt.Exec(title, uid, startTime.Format(time.RFC3339), endTime.Format(time.RFC3339))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func checkMeetingDuplicate(title string) error {
+	result, err := getTitleMeetingStmt.Query(title)
+	if err != nil {
+		return err
+	}
+	defer result.Close()
+	if result.Next() {
+		return errors.New("duplicate meeting title")
+	}
+	return nil
+}
+
+
+
+func checkUserAvailable(uid int, newStart, newEnd time.Time) (conflictMeeting string, err error) {
+	result, err := getPartStmt.Query(uid)
+	if err != nil {
+		return "", err
+	}
+	if result.Next() {
+		var title, start, end string
+		result.Scan(&title, &start, &end)
+		startTime, _ := time.Parse(time.RFC3339, start)
+		endTime, _ := time.Parse(time.RFC3339, end)
+		if (newStart.Before(endTime) && newStart.After(startTime)) ||
+			(newEnd.Before(endTime) && newEnd.After(startTime)) ||
+			(newStart.Before(startTime) && newEnd.After(endTime)) {
+				return title, nil
+		}
+	}
+	result.Close()
+	result, err = getCreatedStmt.Query(uid)
+	defer result.Close()
+	if err != nil {
+		return "", err
+	}
+	if result.Next() {
+		var title, start, end string
+		result.Scan(&title, &start, &end)
+		startTime, _ := time.Parse(time.RFC3339, start)
+		endTime, _ := time.Parse(time.RFC3339, end)
+		if (newStart.Before(endTime) && newStart.After(startTime)) ||
+			(newEnd.Before(endTime) && newEnd.After(startTime)) ||
+			(newStart.Before(startTime) && newEnd.After(endTime)) {
+			return title, nil
+		}
+	}
+	return "", nil
+}
+
+func AddPaticipant(title, username string) error {
+	result, err := getTitleMeetingStmt.Query(title)
+	if err != nil {
+		return err
+	}
+	var mid, creatorID, uid int
+	if result.Next() {
+		var title, start, end string
+		result.Scan(&mid, &title, &creatorID, &start, &end)
+	} else {
+		return errors.New("meeting does not exist")
+	}
+	result.Close()
+	result, err = getUserByNameStmt.Query(username)
+	if err != nil {
+		return err
+	}
+	if result.Next() {
+		var name, pass, email, time string
+		result.Scan(&uid, &name, &pass, &email, &time)
+	} else {
+		return errors.New("user does not exist")
+	}
+	result.Close()
+	if uid == creatorID {
+		return errors.New("new participant is the creator")
+	}
+	_, err = addPartStmt.Exec(uid, mid)
+	return err
 }
 
 func Close() {

@@ -33,3 +33,15 @@ const getUserByName = `SELECT * FROM users WHERE username=?`
 const getUserByEmail = `SELECT * FROM users WHERE email=?`
 
 const getAllUser = `SELECT * FROM users`
+
+const addMeeting = `INSERT INTO meetings(title, creatorid, start, end) values(?, ?, ?, ?)`
+
+const getParticipating = `SELECT title,start,end FROM meetings WHERE mid IN (SELECT mid FROM participants WHERE uid=?)`
+
+const getCreatedMeeting = `SELECT title,start,end FROM meetings WHERE creatorid=?`
+
+const getMeetingByTitle = `SELECT * FROM meetings WHERE title=?`
+
+const addParticipant = `INSERT INTO participants(uid, mid) values(?, ?)`
+
+
