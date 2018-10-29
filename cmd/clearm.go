@@ -16,7 +16,9 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
+	"github.com/SYSU532/agenda/entity"
 	"github.com/spf13/cobra"
 )
 
@@ -24,14 +26,22 @@ import (
 var clearmCmd = &cobra.Command{
 	Use:   "clearm",
 	Short: "Clear all meetings",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Long: fmt.Sprintf(`Use this command to clear all meetings using a already logged in user.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+Usage: %v clearm `, os.Args[0]),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("clearm called")
+		userinfo, err := entity.GetCurrentUser()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Fail to cancel meeting: %v\n", err)
+			return
+		}
+		err = entity.ClearMeeting(userinfo.Username)
+		if err == nil {
+			fmt.Println("Successfully cleared all the meetings")
+		} else {
+			fmt.Fprintf(os.Stderr, "Fail to clear all meetings: %v", err)
+			return
+		}
 	},
 }
 

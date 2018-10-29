@@ -85,5 +85,3 @@ func LoginAgendaTerminal(name string) {
 		}
 	}
 }
-
-
