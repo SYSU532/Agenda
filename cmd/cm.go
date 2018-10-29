@@ -17,15 +17,16 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-	"github.com/SYSU532/agenda/entity"
 	"os"
 	"time"
+
+	"github.com/SYSU532/agenda/entity"
 
 	"github.com/spf13/cobra"
 )
 
-var(
-	cmTitle string
+var (
+	cmTitle         string
 	cmParticipators []string
 )
 
@@ -53,6 +54,10 @@ Usage: %v cm [-t title -p participator1, participator2, ...]`, os.Args[0]),
 			fmt.Print("Enter the number of participators: ")
 			var partNum uint
 			fmt.Scan(&partNum)
+			if partNum == 0 {
+				fmt.Fprintf(os.Stderr, "Fail to create meeting: must have more than one participants\n")
+				return
+			}
 			for i := uint(0); i < partNum; i++ {
 				var part string
 				fmt.Printf("Enter participator %d: ", i)
@@ -60,7 +65,6 @@ Usage: %v cm [-t title -p participator1, participator2, ...]`, os.Args[0]),
 				cmParticipators = append(cmParticipators, part)
 			}
 		}
-
 		format := "2006-01-02 15:04"
 		fmt.Print("Enter the start time of the meeting (format: YYYY-mm-dd hh:mm): ")
 		start, _ := reader.ReadString('\n')
