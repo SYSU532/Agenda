@@ -356,12 +356,12 @@ func FindMeetingByTitle(title string) ([]Meeting, error) {
 		}
 		// Adding creator of meeting
 		result3, _ := getUserByIDStmt.Query(mid)
-		defer result3.Close()
 		result3.Scan(&creaName)
 		output[0].Creator = creaName
 		if creaName == curName {
 			inFlag = true
 		}
+		result3.Close()
 	}
 	if inFlag {
 		return output, nil
@@ -400,10 +400,12 @@ func FindMeetingsByTimeInterval(start, end time.Time) ([]Meeting, error) {
 			cFlag = true
 		}
 		result2, _ := getAllParticipantsStmt.Query(mid)
+		defer result2.Close()
 		var partArr []string
 		for result2.Next() {
 			result2.Scan(&uid)
 			result3, _ := getUserByIDStmt.Query(uid)
+			defer result3.Close()
 			result3.Scan(&partName)
 			if partName == curName {
 				pFlag = true
