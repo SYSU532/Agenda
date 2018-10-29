@@ -14,7 +14,9 @@ import (
 )
 
 var agendaDB *sql.DB
-var addUserStmt, deleteUserStmt, getUserByNameStmt, getUserByEmailStmt, getAllUserStmt, addMeetingStmt, getPartStmt, getCreatedStmt, getTitleMeetingStmt, addPartStmt *sql.Stmt
+var addUserStmt, deleteUserStmt, getUserByNameStmt, getUserByEmailStmt, getUserByIDStmt, getAllUserStmt *sql.Stmt
+var addMeetingStmt, getPartStmt, getCreatedStmt, getTitleMeetingStmt, addPartStmt, getAllMeetingsStmt *sql.Stmt
+var getAllParticipantsStmt *sql.Stmt
 
 const dbPath = "./data"
 const dbFile = "agenda.db"
@@ -24,6 +26,15 @@ type FindUserInfo struct {
 	uid int
 	Username string
 	Email    string
+}
+
+// Meeting structure
+type Meeting struct {
+	StartTime string
+	EndTime string
+	Title string
+	Creator string
+	Participant []string
 }
 
 func init() {
@@ -58,6 +69,8 @@ func init() {
 	checkErr(err)
 	getUserByEmailStmt, err = agendaDB.Prepare(getUserByEmail)
 	checkErr(err)
+	getUserByIDStmt, err = agendaDB.Prepare(getUserNameByID)
+	checkErr(err)
 	getAllUserStmt, err = agendaDB.Prepare(getAllUser)
 	checkErr(err)
 	addMeetingStmt, err = agendaDB.Prepare(addMeeting)
@@ -69,6 +82,10 @@ func init() {
 	getTitleMeetingStmt, err = agendaDB.Prepare(getMeetingByTitle)
 	checkErr(err)
 	addPartStmt, err = agendaDB.Prepare(addParticipant)
+	checkErr(err)
+	getAllMeetingsStmt, err = agendaDB.Prepare(getAllMeetings)
+	checkErr(err)
+	getAllParticipantsStmt, err = agendaDB.Prepare(getAllParticipantsOfMeeting)
 	checkErr(err)
 }
 
@@ -230,8 +247,6 @@ func checkMeetingDuplicate(title string) error {
 	return nil
 }
 
-
-
 func checkUserAvailable(uid int, newStart, newEnd time.Time) (conflictMeeting string, err error) {
 	result, err := getPartStmt.Query(uid)
 	if err != nil {
@@ -297,6 +312,112 @@ func AddPaticipant(title, username string) error {
 	}
 	_, err = addPartStmt.Exec(uid, mid)
 	return err
+}
+
+// Search meeting by special title
+func FindMeetingByTitle(title string) ([]Meeting, error) {
+	var (
+		output []Meeting
+		inFlag bool = false
+	)
+	curInfo, _ := GetCurrentUser()
+	curName := curInfo.Username
+	format := "2006-01-02 15:04"
+	result, err := getTitleMeetingStmt.Query(title)
+	defer result.Close()
+	if err != nil {
+		return output, err
+	}
+	if result.Next() {
+		var (
+			title_, partName, creaName string
+			start, end time.Time
+			mid, cid, uid int
+		)
+		result.Scan(&mid, &title_, &cid, &start, &end)
+		output = append(output, Meeting{StartTime:start.Format(format), EndTime:end.Format(format), Title:title_})
+		result1, err1 := getAllParticipantsStmt.Query(mid)
+		defer result1.Close()
+		if err1 != nil {
+			return output, err1
+		}
+		// Adding participants of meeting
+		for result1.Next() {
+			result1.Scan(&uid)
+			result2, _ := getUserByIDStmt.Query(uid)
+			defer result2.Close()
+			if result2.Next() {
+				result2.Scan(&partName)
+				output[0].Participant = append(output[0].Participant, partName)
+				if partName == curName {
+					inFlag = true
+				}
+			}
+		}
+		// Adding creator of meeting
+		result3, _ := getUserByIDStmt.Query(mid)
+		defer result3.Close()
+		result3.Scan(&creaName)
+		output[0].Creator = creaName
+		if creaName == curName {
+			inFlag = true
+		}
+	}
+	if inFlag {
+		return output, nil
+	} else {
+		return output, errors.New(fmt.Sprintf("Meeting %v exists, but you are neither its creator nor participant ", title))
+	}
+}
+
+// search meeting by start time and end time
+func FindMeetingsByTimeInterval(start, end time.Time) ([]Meeting, error) {
+	var (
+		mid, cid, uid int
+		startTime, endTime time.Time
+		title, creaName, partName string
+		cFlag, pFlag bool
+		output []Meeting
+	)
+	curInfo, _ := GetCurrentUser()
+	curName := curInfo.Username
+	format := "2006-01-02 15:04"
+	result, _ := getAllMeetingsStmt.Query()
+	defer result.Close()
+	for result.Next() {
+		cFlag = false
+		pFlag = false
+		result.Scan(&mid, &title, &cid, &startTime, &endTime)
+		// Judging the meeting is within the providing interval or not
+		if !(startTime.Equal(start) || startTime.After(start)) && (endTime.Equal(end) || endTime.Before(end)) {
+			continue
+		}
+		// JUdging creator and participant of this meeting
+		result1, _ := getUserByIDStmt.Query(mid)
+		defer result1.Close()
+		result1.Scan(&creaName)
+		if curName == creaName {
+			cFlag = true
+		}
+		result2, _ := getAllParticipantsStmt.Query(mid)
+		var partArr []string
+		for result2.Next() {
+			result2.Scan(&uid)
+			result3, _ := getUserByIDStmt.Query(uid)
+			result3.Scan(&partName)
+			if partName == curName {
+				pFlag = true
+			}
+			partArr = append(partArr, partName)
+		}
+		if cFlag || pFlag {
+			output = append(output, Meeting{Creator: creaName, Title: title, StartTime: startTime.Format(format), EndTime: endTime.Format(format)})
+			for _, ele := range partArr {
+				output[0].Participant = append(output[0].Participant, ele)
+			}
+		}
+	}
+	return output, nil
 }
 
 func Close() {

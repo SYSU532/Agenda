@@ -99,16 +99,6 @@ Usage: %v cm [-t title -p participator1, participator2, ...]`, os.Args[0]),
 func init() {
 	rootCmd.AddCommand(cmCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// cmCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// cmCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
 	cmCmd.Flags().StringVarP(&cmTitle, "title", "t", "", "The title of the meeting to be created")
 	cmCmd.Flags().StringArrayVarP(&cmParticipators, "participators", "p", []string{""}, "All the participators of the meeting to be created")
 }

@@ -32,6 +32,8 @@ const getUserByName = `SELECT * FROM users WHERE username=?`
 
 const getUserByEmail = `SELECT * FROM users WHERE email=?`
 
+const getUserNameByID = `SELECT username FROM users WHERE uid=?`
+
 const getAllUser = `SELECT * FROM users`
 
 const addMeeting = `INSERT INTO meetings(title, creatorid, start, end) values(?, ?, ?, ?)`
@@ -44,4 +46,6 @@ const getMeetingByTitle = `SELECT * FROM meetings WHERE title=?`
 
 const addParticipant = `INSERT INTO participants(uid, mid) values(?, ?)`
 
+const getAllMeetings = `SELECT * FROM meetings`
 
+const getAllParticipantsOfMeeting = `SELECT uid FROM participants WHERE mid=?`
