@@ -16,7 +16,7 @@ import (
 var agendaDB *sql.DB
 var addUserStmt, deleteUserStmt, getUserByNameStmt, getUserByEmailStmt, getUserByIDStmt, getAllUserStmt *sql.Stmt
 var addMeetingStmt, getPartStmt, getCreatedStmt, getTitleMeetingStmt, addPartStmt, getAllMeetingsStmt *sql.Stmt
-var cancleMeetingStmt, clearParticipantStmt *sql.Stmt
+var cancelMeetingStmt, clearParticipantStmt, quitMeetingStmt *sql.Stmt
 var getAllParticipantsStmt *sql.Stmt
 
 const dbPath = "./data"
@@ -88,9 +88,11 @@ func init() {
 	checkErr(err)
 	getAllParticipantsStmt, err = agendaDB.Prepare(getAllParticipantsOfMeeting)
 	checkErr(err)
-	cancleMeetingStmt, err = agendaDB.Prepare(cancelMeeting)
+	cancelMeetingStmt, err = agendaDB.Prepare(cancelMeeting)
 	checkErr(err)
 	clearParticipantStmt, err = agendaDB.Prepare(clearParticipant)
+	checkErr(err)
+	quitMeetingStmt, err = agendaDB.Prepare(deleteParticipant)
 	checkErr(err)
 }
 
@@ -231,7 +233,78 @@ func ClearMeeting(username string) error {
 		if err != nil {
 			return err
 		}
-		_, err = cancleMeetingStmt.Exec(title)
+		_, err = cancelMeetingStmt.Exec(title)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func QuitMeeting(title, username string) error {
+	var mid, creatorID, uid int
+	result, err := getTitleMeetingStmt.Query(title)
+	if err != nil {
+		return err
+	}
+	if result.Next() {
+		var (
+			t, start, end string
+		)
+		result.Scan(&mid, &t, &creatorID, &start, &end)
+	} else {
+		return errors.New("no such meeting")
+	}
+	result.Close()
+	result, err = getUserByNameStmt.Query(username)
+	if err != nil {
+		return err
+	}
+	if result.Next() {
+		var (
+			usrname, pass, email, createdTime string
+		)
+		result.Scan(&uid, &usrname, &pass, &email, &createdTime)
+	}
+	result.Close()
+	flag := false
+	result, err = getPartStmt.Query(uid)
+	if err != nil {
+		return err
+	}
+	for result.Next() {
+		var t, start, end string
+		result.Scan(&t, &start, &end)
+		if t == title {
+			flag = true
+		}
+	}
+	result.Close()
+	if !flag {
+		if uid == creatorID {
+			_, err = clearParticipantStmt.Exec(mid)
+			if err != nil {
+				return err
+			}
+			_, err = cancelMeetingStmt.Exec(title)
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+		return errors.New("you are not participating in this meeting")
+	}
+	_, err = quitMeetingStmt.Exec(mid, uid)
+	if err != nil {
+		return err
+	}
+	result, err = getAllParticipantsStmt.Query(mid)
+	if err != nil {
+		return err
+	}
+	defer result.Close()
+	if !result.Next() {
+		_, err = cancelMeetingStmt.Exec(title)
 		if err != nil {
 			return err
 		}
@@ -272,7 +345,7 @@ func CancelMeeting(title, username string) error {
 	if err != nil {
 		return err
 	}
-	_, err = cancleMeetingStmt.Exec(title)
+	_, err = cancelMeetingStmt.Exec(title)
 	if err != nil {
 		return err
 	}

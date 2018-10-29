@@ -23,10 +23,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	cancelmTitle  string
-	participators []string
-)
+var cancelmTitle string
 
 // cancelmCmd represents the cancelm command
 var cancelmCmd = &cobra.Command{

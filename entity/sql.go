@@ -50,6 +50,8 @@ const getMeetingByTitle = `SELECT * FROM meetings WHERE title=?`
 
 const addParticipant = `INSERT INTO participants(uid, mid) values(?, ?)`
 
+const deleteParticipant = `DELETE FROM participants WHERE mid=? AND uid=?`
+
 const getAllMeetings = `SELECT * FROM meetings`
 
 const getAllParticipantsOfMeeting = `SELECT uid FROM participants WHERE mid=?`

@@ -28,7 +28,7 @@ var clearmCmd = &cobra.Command{
 	Short: "Clear all meetings",
 	Long: fmt.Sprintf(`Use this command to clear all meetings using a already logged in user.
 
-Usage: %v cancelm `, os.Args[0]),
+Usage: %v clearm `, os.Args[0]),
 	Run: func(cmd *cobra.Command, args []string) {
 		userinfo, err := entity.GetCurrentUser()
 		if err != nil {
