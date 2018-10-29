@@ -204,23 +204,70 @@ func GetUserList(username string, email string) ([]FindUserInfo, error) {
 	return output, err
 }
 
-func CancelMeeting(title string) error {
-	var mid int
+func ClearMeeting(username string) error {
+	var uid int
+	result, err := getUserByNameStmt.Query(username)
+	if err != nil {
+		return err
+	}
+	if result.Next() {
+		var usrname, pass, email, createdTime string
+		result.Scan(&uid, &usrname, &pass, &email, &createdTime)
+	}
+	result.Close()
+	for {
+		var mid int
+		var title string
+		result, err = getCreatedStmt.Query(uid)
+		if result.Next() {
+			var start, end string
+			result.Scan(&mid, &title, &start, &end)
+		} else {
+			result.Close()
+			break
+		}
+		result.Close()
+		_, err = clearParticipantStmt.Exec(mid)
+		if err != nil {
+			return err
+		}
+		_, err = cancleMeetingStmt.Exec(title)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func CancelMeeting(title, username string) error {
+	var mid, creatorID, uid int
 	result, err := getTitleMeetingStmt.Query(title)
 	if err != nil {
 		return err
 	}
-	defer result.Close()
 	if result.Next() {
 		var (
-			creatorID     int
 			t, start, end string
 		)
 		result.Scan(&mid, &t, &creatorID, &start, &end)
 	} else {
 		return errors.New("no such meeting")
 	}
-
+	result.Close()
+	result, err = getUserByNameStmt.Query(username)
+	if err != nil {
+		return err
+	}
+	if result.Next() {
+		var (
+			usrname, pass, email, createdTime string
+		)
+		result.Scan(&uid, &usrname, &pass, &email, &createdTime)
+	}
+	if uid != creatorID {
+		return errors.New("you are not authorized to cancel this meeting")
+	}
+	result.Close()
 	_, err = clearParticipantStmt.Exec(mid)
 	if err != nil {
 		return err
@@ -303,8 +350,8 @@ func checkUserAvailable(uid int, newStart, newEnd time.Time) (conflictMeeting st
 		return "", err
 	}
 	if result.Next() {
-		var title, start, end string
-		result.Scan(&title, &start, &end)
+		var mid, title, start, end string
+		result.Scan(&mid, &title, &start, &end)
 		startTime, _ := time.Parse(time.RFC3339, start)
 		endTime, _ := time.Parse(time.RFC3339, end)
 		if (newStart.Before(endTime) && newStart.After(startTime)) ||

@@ -44,7 +44,7 @@ const clearParticipant = `DELETE FROM participants WHERE mid=?`
 
 const getParticipating = `SELECT title,start,end FROM meetings WHERE mid IN (SELECT mid FROM participants WHERE uid=?)`
 
-const getCreatedMeeting = `SELECT title,start,end FROM meetings WHERE creatorid=?`
+const getCreatedMeeting = `SELECT mid,title,start,end FROM meetings WHERE creatorid=?`
 
 const getMeetingByTitle = `SELECT * FROM meetings WHERE title=?`
 

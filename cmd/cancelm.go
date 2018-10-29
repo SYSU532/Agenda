@@ -36,19 +36,19 @@ var cancelmCmd = &cobra.Command{
 
 Usage: %v cancelm [-t title]`, os.Args[0]),
 	Run: func(cmd *cobra.Command, args []string) {
-		_, err := entity.GetCurrentUser()
+		userinfo, err := entity.GetCurrentUser()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Fail to cancel meeting: %v\n", err)
 			return
 		}
 		reader := bufio.NewReader(os.Stdin)
 		if cancelmTitle == "" {
-			fmt.Println("Enter the meeting title:")
+			fmt.Printf("Enter the meeting title: ")
 			title, _ := reader.ReadString('\n')
 			cancelmTitle = title[0 : len(title)-1]
 		}
 
-		err = entity.CancelMeeting(cancelmTitle)
+		err = entity.CancelMeeting(cancelmTitle, userinfo.Username)
 		if err == nil {
 			fmt.Println("Successfully canceled meeting")
 		} else {
