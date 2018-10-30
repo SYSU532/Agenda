@@ -436,6 +436,75 @@ func checkUserAvailable(uid int, newStart, newEnd time.Time) (conflictMeeting st
 	return "", nil
 }
 
+func CheckBeforeAddP(title, username string) error {
+	var uid, creatorID int
+	result, err := getUserByNameStmt.Query(username)
+	if err != nil {
+		return err
+	}
+	if result.Next() {
+		var usrname, pass, email, createdTime string
+		result.Scan(&uid, &usrname, &pass, &email, &createdTime)
+	}
+	result.Close()
+	result, err = getTitleMeetingStmt.Query(title)
+	if err != nil {
+		return err
+	}
+	if result.Next() {
+		var (
+			mid           int
+			t, start, end string
+		)
+		result.Scan(&mid, &t, &creatorID, &start, &end)
+	}
+	result.Close()
+	if uid != creatorID {
+		return errors.New("you are not authorized to add participant to this meeting")
+	}
+	return nil
+}
+
+func CheckDupPart(title, part string) error {
+	var mid, partID int
+	pid := make([]int, 0)
+	result, err := getUserByNameStmt.Query(part)
+	if err != nil {
+		return nil
+	}
+	if result.Next() {
+		var usrname, pass, email, createdTime string
+		result.Scan(&partID, &usrname, &pass, &email, &createdTime)
+	}
+	result.Close()
+	result, err = getTitleMeetingStmt.Query(title)
+	if err != nil {
+		return err
+	}
+	if result.Next() {
+		var creatorID int
+		var t, start, end string
+		result.Scan(&mid, &t, &creatorID, &start, &end)
+	}
+	result.Close()
+	result, err = getAllParticipantsStmt.Query(mid)
+	if err != nil {
+		return err
+	}
+	defer result.Close()
+	for result.Next() {
+		var uid int
+		result.Scan(&uid)
+		pid = append(pid, uid)
+	}
+	for i := 0; i < len(pid); i++ {
+		if pid[i] == partID {
+			return errors.New("already in the meeting")
+		}
+	}
+	return nil
+}
+
 func AddPaticipant(title, username string) error {
 	result, err := getTitleMeetingStmt.Query(title)
 	if err != nil {
@@ -544,7 +613,7 @@ func FindMeetingsByTimeInterval(start, end time.Time) ([]Meeting, error) {
 	curName := curInfo.Username
 	format := "2006-01-02 15:04"
 	result, _ := getAllMeetingsStmt.Query()
-	
+
 	for result.Next() {
 		cFlag = false
 		pFlag = false
@@ -573,7 +642,7 @@ func FindMeetingsByTimeInterval(start, end time.Time) ([]Meeting, error) {
 		result2, _ := getAllParticipantsStmt.Query(tempMid[i])
 		var (
 			partArr []string
-			uidArr []int
+			uidArr  []int
 		)
 		for result2.Next() {
 			result2.Scan(&uid)
