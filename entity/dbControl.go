@@ -701,7 +701,7 @@ func FindMeetingsByTimeInterval(start, end time.Time) ([]Meeting, error) {
 		// Judging the meeting is within the providing interval or not
 		st, _ := time.Parse(format, ele.StartTime)
 		ed, _ := time.Parse(format, ele.EndTime)
-		if !(st.Equal(start) || st.After(start)) && (ed.Equal(end) || ed.Before(end)) {
+		if !((st.Equal(start) || st.After(start)) && (ed.Equal(end) || ed.Before(end))) {
 			continue
 		}
 		// JUdging creator and participant of this meeting
