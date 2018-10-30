@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/SYSU532/agenda/entity"
+	"github.com/SYSU532/agenda/Log"
 	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/spf13/cobra"
@@ -40,6 +41,8 @@ var registerCmd = &cobra.Command{
 Usage: %v register -uUserName –password pass –email=a@xxx.com`, os.Args[0]),
 
 	Run: func(cmd *cobra.Command, args []string) {
+		// Write init lOG
+		Log.WriteLog("Invoke register command to create a new user", 1)
 		reader := bufio.NewReader(os.Stdin)
 		if createUserName == "" {
 			fmt.Print("Enter username: ")
@@ -64,29 +67,35 @@ Usage: %v register -uUserName –password pass –email=a@xxx.com`, os.Args[0]),
 		validFormat := true
 		if !checkFormat(createUserName, usernameRegex) {
 			fmt.Println("Username does not fit the required format!")
+			Log.WriteLog("Regist Error: UserName does not fit the required format!", 0)
 			validFormat = false
 		}
 		if !checkFormat(createUserPass, passwordRegex) {
 			fmt.Println("Password does not fit the required format!")
+			Log.WriteLog("Regist Error: Password does not fit the required format!", 0)
 			validFormat = false
 		}
 		if !checkFormat(createUserEmail, emailRegex) {
 			fmt.Println("Email does not fit the required format!")
+			Log.WriteLog("Regist Error: Email does not fit the required format!", 0)
 			validFormat = false
 		}
 		if validFormat {
 			err := entity.AddUser(createUserName, createUserPass, createUserEmail)
 			if err == nil {
 				fmt.Println("Successfully created user!")
+				Log.WriteLog(fmt.Sprintf("Successfully create user %s", createUserName), 1)
 				entity.SetCurrentUser(createUserName, createUserPass)
 				fmt.Println("Automatically login finished!")
 			} else {
 				fmt.Println(err)
 				fmt.Println("FAIL to create user!")
+				Log.WriteLog(err.Error(), 0)
+				Log.WriteLog("FAIL to create user!", 0)
 			}
 		} else {
 			fmt.Println("FAIL to create user!")
+			Log.WriteLog("FAIL to create user!", 0)
 		}
-
 	},
 }

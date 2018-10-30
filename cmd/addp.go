@@ -20,6 +20,7 @@ import (
 	"os"
 
 	"github.com/SYSU532/agenda/entity"
+	"github.com/SYSU532/agenda/Log"
 	"github.com/spf13/cobra"
 )
 
