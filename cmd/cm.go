@@ -67,16 +67,18 @@ Usage: %v cm [-t title -p participator1, participator2, ...]`, os.Args[0]),
 		}
 		format := "2006-01-02 15:04"
 		fmt.Print("Enter the start time of the meeting (format: YYYY-mm-dd hh:mm): ")
-		start, _ := reader.ReadString('\n')
-		start = start[:len(start)-1]
+		//start, _ := reader.ReadString('\n')
+		//start = start[:len(start)-1]
+		start := "2018-10-30 08:00"
 		startTime, err := time.Parse(format, start)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Fail to parse start time\n")
 			return
 		}
 		fmt.Print("Enter the end time of the meeting: ")
-		end, _ := reader.ReadString('\n')
-		end = end[:len(end)-1]
+		//end, _ := reader.ReadString('\n')
+		//end = end[:len(end)-1]
+		end := "2018-10-31 00:00"
 		endTime, err := time.Parse(format, end)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Fail to parse end time\n")
@@ -99,7 +101,10 @@ Usage: %v cm [-t title -p participator1, participator2, ...]`, os.Args[0]),
 			}
 		}
 		if addFail == len(cmParticipators) {
-			entity.CancelMeeting(cmTitle, userInfo.Username)
+			err = entity.CancelMeeting(cmTitle, userInfo.Username)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "%v\n", err)
+			}
 			fmt.Fprintf(os.Stderr, "Fail to create meeting: no participant could be added\n")
 		}
 	},

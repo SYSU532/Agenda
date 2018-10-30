@@ -354,8 +354,8 @@ func CancelMeeting(title, username string) error {
 }
 
 func AddMeeting(title, creator string, startTime, endTime time.Time) error {
-	if startTime.After(endTime) {
-		return errors.New("start time is after end time")
+	if !startTime.Before(endTime) {
+		return errors.New("start time is not before end time")
 	}
 	result, err := getUserByNameStmt.Query(creator)
 	var uid int
@@ -414,6 +414,7 @@ func checkUserAvailable(uid int, newStart, newEnd time.Time) (conflictMeeting st
 		if (newStart.Before(endTime) && newStart.After(startTime)) ||
 			(newEnd.Before(endTime) && newEnd.After(startTime)) ||
 			(newStart.Before(startTime) && newEnd.After(endTime)) {
+			result.Close()
 			return title, nil
 		}
 	}
