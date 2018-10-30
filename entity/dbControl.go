@@ -414,7 +414,7 @@ func checkUserAvailable(uid int, newStart, newEnd time.Time) (conflictMeeting st
 
 		if (newStart.Before(endTime) && newStart.After(startTime)) ||
 			(newEnd.Before(endTime) && newEnd.After(startTime)) ||
-			(newStart.Before(startTime) && newEnd.After(endTime)) {
+			(!newStart.After(startTime) && !newEnd.Before(endTime)) {
 			result.Close()
 			return title, nil
 		}
@@ -432,7 +432,7 @@ func checkUserAvailable(uid int, newStart, newEnd time.Time) (conflictMeeting st
 		endTime, _ := time.Parse(time.RFC3339, end)
 		if (newStart.Before(endTime) && newStart.After(startTime)) ||
 			(newEnd.Before(endTime) && newEnd.After(startTime)) ||
-			(newStart.Before(startTime) && newEnd.After(endTime)) {
+			(!newStart.After(startTime) && !newEnd.Before(endTime)) {
 			return title, nil
 		}
 	}
