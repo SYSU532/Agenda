@@ -55,7 +55,7 @@ Usage: %v cm [-t title -p participator1, participator2, ...]`, os.Args[0]),
 			var partNum uint
 			fmt.Scan(&partNum)
 			if partNum == 0 {
-				fmt.Fprintf(os.Stderr, "Fail to create meeting: must have more than one participants\n")
+				fmt.Fprintf(os.Stderr, "Fail to create meeting: must have at least one participants\n")
 				return
 			}
 			for i := uint(0); i < partNum; i++ {

@@ -15,9 +15,8 @@ import (
 
 var agendaDB *sql.DB
 var addUserStmt, deleteUserStmt, getUserByNameStmt, getUserByEmailStmt, getUserByIDStmt, getAllUserStmt *sql.Stmt
-var addMeetingStmt, getPartStmt, getCreatedStmt, getTitleMeetingStmt, addPartStmt, getAllMeetingsStmt *sql.Stmt
-var cancelMeetingStmt, clearParticipantStmt, quitMeetingStmt *sql.Stmt
-var getAllParticipantsStmt *sql.Stmt
+var cancelMeetingStmt, quitMeetingStmt, addMeetingStmt, getPartStmt, getCreatedStmt, getTitleMeetingStmt, addPartStmt, getAllMeetingsStmt *sql.Stmt
+var getAllParticipantsStmt, clearParticipantStmt, removeParticipantStmt *sql.Stmt
 
 const dbPath = "./data"
 const dbFile = "agenda.db"
@@ -93,6 +92,8 @@ func init() {
 	clearParticipantStmt, err = agendaDB.Prepare(clearParticipant)
 	checkErr(err)
 	quitMeetingStmt, err = agendaDB.Prepare(deleteParticipant)
+	checkErr(err)
+	removeParticipantStmt, err = agendaDB.Prepare(deleteParticipant)
 	checkErr(err)
 }
 
@@ -405,7 +406,7 @@ func checkUserAvailable(uid int, newStart, newEnd time.Time) (conflictMeeting st
 	if err != nil {
 		return "", err
 	}
-	if result.Next() {
+	for result.Next() {
 		var title, start, end string
 		result.Scan(&title, &start, &end)
 		startTime, _ := time.Parse(time.RFC3339, start)
@@ -418,11 +419,11 @@ func checkUserAvailable(uid int, newStart, newEnd time.Time) (conflictMeeting st
 	}
 	result.Close()
 	result, err = getCreatedStmt.Query(uid)
-	defer result.Close()
 	if err != nil {
 		return "", err
 	}
-	if result.Next() {
+	defer result.Close()
+	for result.Next() {
 		var mid, title, start, end string
 		result.Scan(&mid, &title, &start, &end)
 		startTime, _ := time.Parse(time.RFC3339, start)
@@ -436,7 +437,7 @@ func checkUserAvailable(uid int, newStart, newEnd time.Time) (conflictMeeting st
 	return "", nil
 }
 
-func CheckBeforeAddP(title, username string) error {
+func CheckBeforeModP(title, username string) error {
 	var uid, creatorID int
 	result, err := getUserByNameStmt.Query(username)
 	if err != nil {
@@ -505,7 +506,7 @@ func CheckDupPart(title, part string) error {
 	return nil
 }
 
-func AddPaticipant(title, username string) error {
+func RmParticipant(title, username string) error {
 	result, err := getTitleMeetingStmt.Query(title)
 	if err != nil {
 		return err
@@ -529,8 +530,81 @@ func AddPaticipant(title, username string) error {
 		return errors.New("user does not exist")
 	}
 	result.Close()
+	pid := make([]int, 0)
+	result, err = getAllParticipantsStmt.Query(mid)
+	if err != nil {
+		return err
+	}
+	for result.Next() {
+		var id int
+		result.Scan(&id)
+		pid = append(pid, id)
+	}
+	result.Close()
+	flag := false
+	for _, p := range pid {
+		if p == uid {
+			flag = true
+		}
+	}
+	if !flag {
+		return errors.New("participant is currently not in this meeting")
+	}
+	_, err = removeParticipantStmt.Exec(mid, uid)
+	if err != nil {
+		return err
+	}
+	result, err = getAllParticipantsStmt.Query(mid)
+	if err != nil {
+		return err
+	}
+	defer result.Close()
+	if !result.Next() {
+		_, err = cancelMeetingStmt.Exec(title)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func AddPaticipant(title, username string) error {
+	result, err := getTitleMeetingStmt.Query(title)
+	if err != nil {
+		return err
+	}
+	var mid, creatorID, uid int
+	var start, end string
+	if result.Next() {
+		var title string
+		result.Scan(&mid, &title, &creatorID, &start, &end)
+	} else {
+		return errors.New("meeting does not exist")
+	}
+	result.Close()
+	result, err = getUserByNameStmt.Query(username)
+	if err != nil {
+		return err
+	}
+	if result.Next() {
+		var name, pass, email, time string
+		result.Scan(&uid, &name, &pass, &email, &time)
+	} else {
+		return errors.New("user does not exist")
+	}
+	result.Close()
 	if uid == creatorID {
 		return errors.New("new participant is the creator")
+	}
+	format := "2006-01-02 15:04"
+	startTime, err := time.Parse(format, start)
+	endTime, err := time.Parse(format, end)
+	conflict, err := checkUserAvailable(uid, startTime, endTime)
+	if err != nil {
+		return err
+	}
+	if conflict != "" {
+		return errors.New("time conflict meeting: " + conflict)
 	}
 	_, err = addPartStmt.Exec(uid, mid)
 	return err
