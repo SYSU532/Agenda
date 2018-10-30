@@ -19,6 +19,7 @@ import (
 	"os"
 
 	"github.com/SYSU532/agenda/entity"
+	"github.com/SYSU532/agenda/Log"
 	"github.com/spf13/cobra"
 )
 
@@ -30,16 +31,21 @@ var clearmCmd = &cobra.Command{
 
 Usage: %v clearm `, os.Args[0]),
 	Run: func(cmd *cobra.Command, args []string) {
+		// Write init lOG
+		Log.WriteLog("Invoke clear meeting command to stop all the meetings you create", 1)
 		userinfo, err := entity.GetCurrentUser()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Fail to cancel meeting: %v\n", err)
+			Log.WriteLog("Error when geeting current user, maybe you are not logged in", 0)
 			return
 		}
 		err = entity.ClearMeeting(userinfo.Username)
 		if err == nil {
 			fmt.Println("Successfully cleared all the meetings")
+			Log.WriteLog("Successfully cleared all the meetings", 1)
 		} else {
 			fmt.Fprintf(os.Stderr, "Fail to clear all meetings: %v", err)
+			Log.WriteLog(fmt.Sprintf("Fail to clear all meetings: %v", err), 0)
 			return
 		}
 	},

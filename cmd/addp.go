@@ -37,9 +37,12 @@ var addpCmd = &cobra.Command{
 	using a already logged in user.
 	Usage: %v addp [-t title -p participator1, participator2, ...]`, os.Args[0]),
 	Run: func(cmd *cobra.Command, args []string) {
+		// Write init lOG
+		Log.WriteLog("Invoke add participant command to add persons in meeting", 1)
 		userinfo, err := entity.GetCurrentUser()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Fail to add participator: %v\n", err)
+			Log.WriteLog("Error when geeting current user, maybe you are not logged in", 0)
 			return
 		}
 		reader := bufio.NewReader(os.Stdin)
@@ -65,19 +68,25 @@ var addpCmd = &cobra.Command{
 			for _, part := range addpParticipators {
 				err = entity.CheckDupPart(addpTitle, part)
 				if err != nil {
-					fmt.Printf("Fail to add participant %v: %v\n", part, err)
+					tmp := fmt.Sprintf("Meeting %v Fail to add participant %v: %v", addpTitle, part, err)
+					fmt.Println(tmp)
+					Log.WriteLog(tmp, 0)
 					continue
 				}
 				err = entity.AddPaticipant(addpTitle, part)
 				if err != nil {
-					fmt.Printf("Fail to add participant %v: %v\n", part, err)
+					tmp := fmt.Sprintf("Meeting %v Fail to add participant %v: %v", addpTitle, part, err)
+					fmt.Println(tmp)
+					Log.WriteLog(tmp, 0)
 				}
 			}
 			if err == nil {
 				fmt.Println("Successfully added participant(s)")
+				Log.WriteLog(fmt.Sprintf("Successfully add participant into Meeting %v", addpTitle), 1)
 			}
 		} else {
 			fmt.Fprintf(os.Stderr, "Fail to add participant: %v\n", err)
+			Log.WriteLog(fmt.Sprintf("Fail to add participant: %v", err), 0)
 			return
 		}
 	},

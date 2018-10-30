@@ -21,6 +21,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/SYSU532/agenda/entity"
+	"github.com/SYSU532/agenda/Log"
 	"github.com/spf13/cobra"
 	"os"
 	"time"
@@ -40,6 +41,8 @@ var fmCmd = &cobra.Command{
 Usage: %v fm [-t title -s startTime -e endTime]`, os.Args[0]),
 
 	Run: func(cmd *cobra.Command, args []string) {
+		// Write init lOG
+		Log.WriteLog("Invoke find meeting command to search conditional meetings you create or join in", 1)
 		var (
 			result []entity.Meeting
 			err    error
@@ -70,7 +73,9 @@ Usage: %v fm [-t title -s startTime -e endTime]`, os.Args[0]),
 			fmt.Println(err)
 			os.Exit(1)
 		} else if len(result) == 0 {
-			fmt.Println("No any meeting you create or join satisfies the searching conditions!")
+			tmp := "No any meeting you create or join satisfies the searching conditions!"
+			fmt.Println(tmp)
+			Log.WriteLog(tmp, 0)
 			os.Exit(1)
 		}
 		fmt.Printf("|%-20v|%-20v|%-20v|%-20v|%-20v|\n", "Title", "StartTime", "EndTime", "Creator", "Participant")
@@ -86,6 +91,7 @@ Usage: %v fm [-t title -s startTime -e endTime]`, os.Args[0]),
 			}
 			fmt.Printf("%-20v|\n", strRes)
 		}
+		Log.WriteLog("Finding meetings done! Print target meetings..", 1)
 	},
 }
 

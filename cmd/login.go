@@ -6,15 +6,13 @@ package cmd
 
 import (
 	"bufio"
-	"bytes"
+	"syscall"
 	"fmt"
 	"github.com/SYSU532/agenda/entity"
+	"github.com/SYSU532/agenda/Log"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 	"os"
-	"os/exec"
-	"strings"
-	"syscall"
 )
 
 var loginUsername, loginPassword string
@@ -25,6 +23,8 @@ var loginCmd = &cobra.Command{
 	Short: "Login User.",
 	Long:  `Login user in order to perform operations like creating meetings, view current meetings, etc.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		// Write init lOG
+		Log.WriteLog("Invoke log in command to log user with username and password", 1)
 		reader := bufio.NewReader(os.Stdin)
 		if loginUsername == "" {
 			fmt.Print("Enter username: ")
@@ -41,15 +41,18 @@ var loginCmd = &cobra.Command{
 		err := entity.LoginUser(loginUsername, loginPassword)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Fail to login: %v\n", err)
+			Log.WriteLog(fmt.Sprintf("Fail to login: %v\n", err), 0)
 			os.Exit(0)
 		}
 		err = entity.SetCurrentUser(loginUsername, loginPassword)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Fail to login: %v\n", err)
+			Log.WriteLog(fmt.Sprintf("Fail to login: %v\n", err), 0)
 			os.Exit(0)
 		}
-		fmt.Printf("Login as user %v succeeded.\n", loginUsername)
-		//LoginAgendaTerminal(loginUsername)
+		logMess := fmt.Sprintf("Login as user %v succeeded.", loginUsername)
+		fmt.Println(logMess)
+		Log.WriteLog(logMess, 1)
 	},
 }
 
@@ -60,28 +63,3 @@ func init() {
 	loginCmd.Flags().StringVarP(&loginPassword, "password", "p", "", "The password of the user.")
 }
 
-func LoginAgendaTerminal(name string) {
-	var (
-		input  string
-		output bytes.Buffer
-		items  []string
-	)
-	s := fmt.Sprintf("%s@Agenda~: ", name)
-	for {
-		fmt.Printf(s)
-		fmt.Scanln(&input)
-		items = strings.Split(input, " ")
-		if items[0] == "exit" {
-			//entity.ClearCurrentUser()
-			break
-		} else if items[0] == "login" {
-			fmt.Println("Do not login again in Agenda Termial!")
-		} else {
-			cmd := exec.Command(os.Args[0], input)
-			cmd.Stdout = &output
-			cmd.Run()
-			fmt.Printf(output.String())
-			output.Reset()
-		}
-	}
-}
