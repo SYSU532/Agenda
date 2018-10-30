@@ -90,12 +90,17 @@ Usage: %v cm [-t title -p participator1, participator2, ...]`, os.Args[0]),
 			fmt.Fprintf(os.Stderr, "Fail to create meeting: %v\n", err)
 			return
 		}
-
+		addFail := 0
 		for _, part := range cmParticipators {
 			err = entity.AddPaticipant(cmTitle, part)
 			if err != nil {
-				fmt.Printf("Fail to add participant %v: %v\n", part, err)
+				addFail += 1
+				fmt.Fprintf(os.Stderr, "Fail to add participant %v: %v\n", part, err)
 			}
+		}
+		if addFail == len(cmParticipators) {
+			entity.CancelMeeting(cmTitle, userInfo.Username)
+			fmt.Fprintf(os.Stderr, "Fail to create meeting: no participant could be added\n")
 		}
 	},
 }
