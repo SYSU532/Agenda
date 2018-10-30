@@ -54,14 +54,16 @@ Usage: %v fm [-t title -s startTime -e endTime]`, os.Args[0]),
 			if fmStartTime == "" {
 				fmt.Printf("Enter the start time of meetings interval: ")
 				fmStartTime, _ = reader.ReadString('\n')
+				fmStartTime = fmStartTime[:len(fmStartTime)-1]
 			}
 			if fmEndTime == "" {
 				fmt.Printf("Enter the end time of meetings interval: ")
 				fmEndTime, _ = reader.ReadString('\n')
+				fmEndTime = fmEndTime[:len(fmEndTime)-1]
 			}
 			// Parsing string to time.Time
-			startTime, _ := time.Parse(format, fmStartTime[:len(fmStartTime)-1])
-			endTime, _ := time.Parse(format, fmEndTime[:len(fmEndTime)-1])
+			startTime, _ := time.Parse(format, fmStartTime)
+			endTime, _ := time.Parse(format, fmEndTime)
 			result, err = entity.FindMeetingsByTimeInterval(startTime, endTime)
 		}
 		if err != nil {

@@ -596,7 +596,7 @@ func AddPaticipant(title, username string) error {
 	if uid == creatorID {
 		return errors.New("new participant is the creator")
 	}
-	format := "2006-01-02 15:04"
+	format := time.RFC3339
 	startTime, err := time.Parse(format, start)
 	endTime, err := time.Parse(format, end)
 	conflict, err := checkUserAvailable(uid, startTime, endTime)
