@@ -67,18 +67,16 @@ Usage: %v cm [-t title -p participator1, participator2, ...]`, os.Args[0]),
 		}
 		format := "2006-01-02 15:04"
 		fmt.Print("Enter the start time of the meeting (format: YYYY-mm-dd hh:mm): ")
-		//start, _ := reader.ReadString('\n')
-		//start = start[:len(start)-1]
-		start := "2018-10-30 08:00"
+		start, _ := reader.ReadString('\n')
+		start = start[:len(start)-1]
 		startTime, err := time.Parse(format, start)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Fail to parse start time\n")
 			return
 		}
 		fmt.Print("Enter the end time of the meeting: ")
-		//end, _ := reader.ReadString('\n')
-		//end = end[:len(end)-1]
-		end := "2018-10-31 00:00"
+		end, _ := reader.ReadString('\n')
+		end = end[:len(end)-1]
 		endTime, err := time.Parse(format, end)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Fail to parse end time\n")
@@ -87,26 +85,28 @@ Usage: %v cm [-t title -p participator1, participator2, ...]`, os.Args[0]),
 
 		err = entity.AddMeeting(cmTitle, userInfo.Username, startTime, endTime)
 		if err == nil {
-			fmt.Println("Successfully created meeting,")
+			addFail := 0
+			for _, part := range cmParticipators {
+				err = entity.AddPaticipant(cmTitle, part)
+				if err != nil {
+					addFail += 1
+					fmt.Fprintf(os.Stderr, "Fail to add participant %v: %v\n", part, err)
+				}
+			}
+			if addFail == len(cmParticipators) {
+				err = entity.CancelMeeting(cmTitle, userInfo.Username)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "%v\n", err)
+				}
+				fmt.Fprintf(os.Stderr, "Fail to create meeting: no participant could be added\n")
+			} else {
+				fmt.Println("Successfully created meeting,")
+			}
 		} else {
 			fmt.Fprintf(os.Stderr, "Fail to create meeting: %v\n", err)
 			return
 		}
-		addFail := 0
-		for _, part := range cmParticipators {
-			err = entity.AddPaticipant(cmTitle, part)
-			if err != nil {
-				addFail += 1
-				fmt.Fprintf(os.Stderr, "Fail to add participant %v: %v\n", part, err)
-			}
-		}
-		if addFail == len(cmParticipators) {
-			err = entity.CancelMeeting(cmTitle, userInfo.Username)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v\n", err)
-			}
-			fmt.Fprintf(os.Stderr, "Fail to create meeting: no participant could be added\n")
-		}
+
 	},
 }
 
