@@ -664,12 +664,13 @@ func FindMeetingByTitle(title string) ([]Meeting, error) {
 			inFlag = true
 		}
 		result3.Close()
+		if inFlag {
+			return output, nil
+		} else {
+			return output, errors.New(fmt.Sprintf("Meeting %v exists, but you are neither its creator nor participant ", title))
+		}
 	}
-	if inFlag {
-		return output, nil
-	} else {
-		return output, errors.New(fmt.Sprintf("Meeting %v exists, but you are neither its creator nor participant ", title))
-	}
+	return output, nil
 }
 
 // search meeting by start time and end time
@@ -728,6 +729,7 @@ func FindMeetingsByTimeInterval(start, end time.Time) ([]Meeting, error) {
 			if result3.Next() {
 				result3.Scan(&partName)
 			}
+			result3.Close()
 			if partName == curName {
 				pFlag = true
 			}
