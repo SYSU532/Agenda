@@ -8,7 +8,7 @@ import (
 	"syscall"
 
 	"github.com/SYSU532/agenda/entity"
-	"github.com/SYSU532/agenda/Log"
+	"github.com/SYSU532/agenda/log"
 	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/spf13/cobra"
@@ -44,7 +44,7 @@ Usage: %v register -uUserName –pPassword –email=a@xxx.com -oXXXXXXXXXXX`, os
 
 	Run: func(cmd *cobra.Command, args []string) {
 		// Write init lOG
-		Log.WriteLog("Invoke register command to create a new user", 1)
+		log.WriteLog("Invoke register command to create a new user", 1)
 		reader := bufio.NewReader(os.Stdin)
 		if createUserName == "" {
 			fmt.Print("Enter username: ")
@@ -75,41 +75,41 @@ Usage: %v register -uUserName –pPassword –email=a@xxx.com -oXXXXXXXXXXX`, os
 		validFormat := true
 		if !checkFormat(createUserName, usernameRegex) {
 			fmt.Println("Username does not fit the required format!")
-			Log.WriteLog("Regist Error: UserName does not fit the required format!", 0)
+			log.WriteLog("Regist Error: UserName does not fit the required format!", 0)
 			validFormat = false
 		}
 		if !checkFormat(createUserPass, passwordRegex) {
 			fmt.Println("Password does not fit the required format!")
-			Log.WriteLog("Regist Error: Password does not fit the required format!", 0)
+			log.WriteLog("Regist Error: Password does not fit the required format!", 0)
 			validFormat = false
 		}
 		if !checkFormat(createUserEmail, emailRegex) {
 			fmt.Println("Email does not fit the required format!")
-			Log.WriteLog("Regist Error: Email does not fit the required format!", 0)
+			log.WriteLog("Regist Error: Email does not fit the required format!", 0)
 			validFormat = false
 		}
 		if !checkFormat(createUserPhone, phoneRegex) {
 			fmt.Println("Phone number does not fit the required format!")
-			Log.WriteLog("Regist Error: Phone does not fit the required format!", 0)
+			log.WriteLog("Regist Error: Phone does not fit the required format!", 0)
 			validFormat = false
 		}
 		if validFormat {
 			err := entity.AddUser(createUserName, createUserPass, createUserEmail, createUserPhone)
 			if err == nil {
 				fmt.Println("Successfully created user!")
-				Log.WriteLog(fmt.Sprintf("Successfully create user %s, email %s, phone %s", createUserName, createUserEmail, createUserPhone), 1)
+				log.WriteLog(fmt.Sprintf("Successfully create user %s, email %s, phone %s", createUserName, createUserEmail, createUserPhone), 1)
 				entity.SetCurrentUser(createUserName, createUserPass)
 				fmt.Println("Automatically login finished!")
-				Log.WriteLog(fmt.Sprintf("Login as user %s succeeded", createUserName), 1)
+				log.WriteLog(fmt.Sprintf("Login as user %s succeeded", createUserName), 1)
 			} else {
 				fmt.Println(err)
 				fmt.Println("FAIL to create user!")
-				Log.WriteLog(err.Error(), 0)
-				Log.WriteLog("FAIL to create user!", 0)
+				log.WriteLog(err.Error(), 0)
+				log.WriteLog("FAIL to create user!", 0)
 			}
 		} else {
 			fmt.Println("FAIL to create user!")
-			Log.WriteLog("FAIL to create user!", 0)
+			log.WriteLog("FAIL to create user!", 0)
 		}
 	},
 }

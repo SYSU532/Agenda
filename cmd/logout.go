@@ -17,7 +17,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/SYSU532/agenda/entity"
-	"github.com/SYSU532/agenda/Log"
+	"github.com/SYSU532/agenda/log"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -31,22 +31,22 @@ var logoutCmd = &cobra.Command{
 Usage: %v logout`, os.Args[0]),
 	Run: func(cmd *cobra.Command, args []string) {
 		// Write init lOG
-		Log.WriteLog("Invoke log out command to sign out current user", 1)
+		log.WriteLog("Invoke log out command to sign out current user", 1)
 		info, err := entity.GetCurrentUser()
 		if err != nil {
 			fmt.Println("You are currently not login!")
-			Log.WriteLog("You are currently not login!", 0)
+			log.WriteLog("You are currently not login!", 0)
 			return
 		}
 		err = entity.ClearCurrentUser()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error when logging out: %v\n", err)
-			Log.WriteLog(fmt.Sprintf("Error when logging out: %v", err), 0)
+			log.WriteLog(fmt.Sprintf("Error when logging out: %v", err), 0)
 			return
 		}
 		logMess := fmt.Sprintf("user successfully log out from %v", info.Username)
 		fmt.Println(logMess)
-		Log.WriteLog(logMess, 1)
+		log.WriteLog(logMess, 1)
 	},
 }
 

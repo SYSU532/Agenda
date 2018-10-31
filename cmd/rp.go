@@ -20,7 +20,7 @@ import (
 	"os"
 
 	"github.com/SYSU532/agenda/entity"
-	"github.com/SYSU532/agenda/Log"
+	"github.com/SYSU532/agenda/log"
 	"github.com/spf13/cobra"
 )
 
@@ -38,11 +38,11 @@ var rpCmd = &cobra.Command{
 	Usage: %v rp [-t title -p participator1, participator2, ...]`, os.Args[0]),
 	Run: func(cmd *cobra.Command, args []string) {
 		// Write init lOG
-		Log.WriteLog("Invoke remove participant command to clean special participants in your meetings", 1)
+		log.WriteLog("Invoke remove participant command to clean special participants in your meetings", 1)
 		userinfo, err := entity.GetCurrentUser()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Fail to remove participator: %v\n", err)
-			Log.WriteLog("Error when geeting current user, maybe you are not logged in", 0)
+			log.WriteLog("Error when geeting current user, maybe you are not logged in", 0)
 			return
 		}
 		reader := bufio.NewReader(os.Stdin)
@@ -63,7 +63,7 @@ var rpCmd = &cobra.Command{
 				rpParticipators = append(rpParticipators, part)
 			}
 		}
-		Log.WriteLog(fmt.Sprintf("user %s begin to remove participants from meeting %s, target participants: %v", userinfo. Username, rpTitle, rpParticipators), 1)
+		log.WriteLog(fmt.Sprintf("user %s begin to remove participants from meeting %s, target participants: %v", userinfo. Username, rpTitle, rpParticipators), 1)
 		err = entity.CheckBeforeModP(rpTitle, userinfo.Username)
 		if err == nil {
 			for _, part := range rpParticipators {
@@ -71,17 +71,17 @@ var rpCmd = &cobra.Command{
 				if err != nil {
 					tmp := fmt.Sprintf("Fail to remove participant %v: %v", part, err)
 					fmt.Println(tmp)
-					Log.WriteLog(tmp, 0)
+					log.WriteLog(tmp, 0)
 				}
 			}
 			if err == nil {
 				fmt.Println("Successfully removed participant(s)")
-				Log.WriteLog("Successfully removed participant(s)", 1)
+				log.WriteLog("Successfully removed participant(s)", 1)
 			}
 		} else {
 			tmp := fmt.Sprintf("Fail to remove participant %v", err)
 			fmt.Fprintf(os.Stderr, tmp, "\n")
-			Log.WriteLog(tmp, 0)
+			log.WriteLog(tmp, 0)
 			return
 		}
 	},

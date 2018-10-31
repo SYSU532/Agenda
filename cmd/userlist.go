@@ -7,7 +7,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/SYSU532/agenda/entity"
-	"github.com/SYSU532/agenda/Log"
+	"github.com/SYSU532/agenda/log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -31,18 +31,18 @@ Usage: %v userlist [-uUserName] [-eEmail]`, os.Args[0]),
 
 	Run: func(cmd *cobra.Command, args []string) {
 		// Write init lOG
-		Log.WriteLog("Invoke user list command to list all users in agenda system", 1)
+		log.WriteLog("Invoke user list command to list all users in agenda system", 1)
 		result, err := entity.GetUserList(targetUserName, targetEmail)
 		if err != nil {
 			fmt.Println("FAIL to print user list!")
-			Log.WriteLog("Fail to print user list", 0)
+			log.WriteLog("Fail to print user list", 0)
 		} else if len(result) == 0 {
 			if targetUserName == "" && targetEmail == "" {
 				fmt.Println("There is no user in the DataBase!")
-				Log.WriteLog("No any user in the database", 0)
+				log.WriteLog("No any user in the database", 0)
 			} else {
 				fmt.Println("There is no user satisfying your searching conditions!")
-				Log.WriteLog("No any user satisfies your searching conditions", 0)
+				log.WriteLog("No any user satisfies your searching conditions", 0)
 			}
 		} else {
 			fmt.Printf("|%-20v|%-20v|%-20v|\n", "Username", "Email", "Phone")
@@ -50,7 +50,7 @@ Usage: %v userlist [-uUserName] [-eEmail]`, os.Args[0]),
 			for _, ele := range result {
 				fmt.Printf("|%-20v|%-20v|%-20v|\n", ele.Username, ele.Email, ele.Phone)
 			}
-			Log.WriteLog("List users done!Print target users info....", 1)
+			log.WriteLog("List users done!Print target users info....", 1)
 		}
 	},
 }

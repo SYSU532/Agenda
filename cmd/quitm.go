@@ -20,7 +20,7 @@ import (
 	"os"
 
 	"github.com/SYSU532/agenda/entity"
-	"github.com/SYSU532/agenda/Log"
+	"github.com/SYSU532/agenda/log"
 	"github.com/spf13/cobra"
 )
 
@@ -35,11 +35,11 @@ var quitmCmd = &cobra.Command{
 Usage: %v quitm [-t title]`, os.Args[0]),
 	Run: func(cmd *cobra.Command, args []string) {
 		// Write init lOG
-		Log.WriteLog("Invoke quit meeting command to quit joining in some meetings", 1)
+		log.WriteLog("Invoke quit meeting command to quit joining in some meetings", 1)
 		userinfo, err := entity.GetCurrentUser()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Fail to cancel meeting: %v\n", err)
-			Log.WriteLog("Error when geeting current user, maybe you are not logged in", 0)
+			log.WriteLog("Error when geeting current user, maybe you are not logged in", 0)
 			return
 		}
 		reader := bufio.NewReader(os.Stdin)
@@ -52,10 +52,10 @@ Usage: %v quitm [-t title]`, os.Args[0]),
 		if err == nil {
 			success := fmt.Sprintf("Successfully quited the meeting: %v", quitmTitle)
 			fmt.Println(success)
-			Log.WriteLog(success, 1)
+			log.WriteLog(success, 1)
 		} else {
 			fmt.Fprintf(os.Stderr, "Fail to quit the meeting: %v", err)
-			Log.WriteLog(fmt.Sprintf("user %s fail to quit meeting %s", userinfo.Username, quitmTitle), 0)
+			log.WriteLog(fmt.Sprintf("user %s fail to quit meeting %s", userinfo.Username, quitmTitle), 0)
 			return
 		}
 	},

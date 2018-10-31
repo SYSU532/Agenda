@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"fmt"
 	"github.com/SYSU532/agenda/entity"
-	"github.com/SYSU532/agenda/Log"
+	"github.com/SYSU532/agenda/log"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 	"os"
@@ -24,7 +24,7 @@ var loginCmd = &cobra.Command{
 	Long:  `Login user in order to perform operations like creating meetings, view current meetings, etc.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Write init lOG
-		Log.WriteLog("Invoke log in command to log user with username and password", 1)
+		log.WriteLog("Invoke log in command to log user with username and password", 1)
 		reader := bufio.NewReader(os.Stdin)
 		if loginUsername == "" {
 			fmt.Print("Enter username: ")
@@ -41,18 +41,18 @@ var loginCmd = &cobra.Command{
 		err := entity.LoginUser(loginUsername, loginPassword)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Fail to login: %v\n", err)
-			Log.WriteLog(fmt.Sprintf("Fail to login: %v\n", err), 0)
+			log.WriteLog(fmt.Sprintf("Fail to login: %v\n", err), 0)
 			os.Exit(0)
 		}
 		err = entity.SetCurrentUser(loginUsername, loginPassword)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Fail to login: %v\n", err)
-			Log.WriteLog(fmt.Sprintf("Fail to login: %v\n", err), 0)
+			log.WriteLog(fmt.Sprintf("Fail to login: %v\n", err), 0)
 			os.Exit(0)
 		}
 		logMess := fmt.Sprintf("Login as user %v succeeded", loginUsername)
 		fmt.Println(logMess)
-		Log.WriteLog(logMess, 1)
+		log.WriteLog(logMess, 1)
 	},
 }
 

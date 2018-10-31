@@ -21,7 +21,7 @@ import (
 	"time"
 
 	"github.com/SYSU532/agenda/entity"
-	"github.com/SYSU532/agenda/Log"
+	"github.com/SYSU532/agenda/log"
 	"github.com/spf13/cobra"
 )
 
@@ -39,11 +39,11 @@ var cmCmd = &cobra.Command{
 Usage: %v cm [-t title -p participator1, participator2, ...]`, os.Args[0]),
 	Run: func(cmd *cobra.Command, args []string) {
 		// Write init lOG
-		Log.WriteLog("Invoke create meeting command to create special meeting with others", 1)
+		log.WriteLog("Invoke create meeting command to create special meeting with others", 1)
 		userInfo, err := entity.GetCurrentUser()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Fail to create meeting: %v\n", err)
-			Log.WriteLog("Error when geeting current user, maybe you are not logged in", 0)
+			log.WriteLog("Error when geeting current user, maybe you are not logged in", 0)
 			return
 		}
 		reader := bufio.NewReader(os.Stdin)
@@ -59,7 +59,7 @@ Usage: %v cm [-t title -p participator1, participator2, ...]`, os.Args[0]),
 			fmt.Scan(&partNum)
 			if partNum == 0 {
 				fmt.Fprintf(os.Stderr, "Fail to create meeting: must have at least one participants\n")
-				Log.WriteLog("Fail to create meeting: must have at least one participants\n", 0)
+				log.WriteLog("Fail to create meeting: must have at least one participants\n", 0)
 				return
 			}
 			for i := uint(0); i < partNum; i++ {
@@ -76,7 +76,7 @@ Usage: %v cm [-t title -p participator1, participator2, ...]`, os.Args[0]),
 		startTime, err := time.Parse(format, start)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Fail to parse start time\n")
-			Log.WriteLog("Fail to parse start time", 0)
+			log.WriteLog("Fail to parse start time", 0)
 			return
 		}
 		fmt.Print("Enter the end time of the meeting: ")
@@ -85,7 +85,7 @@ Usage: %v cm [-t title -p participator1, participator2, ...]`, os.Args[0]),
 		endTime, err := time.Parse(format, end)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Fail to parse end time\n")
-			Log.WriteLog("Fail to parse end time", 0)
+			log.WriteLog("Fail to parse end time", 0)
 			return
 		}
 
@@ -97,7 +97,7 @@ Usage: %v cm [-t title -p participator1, participator2, ...]`, os.Args[0]),
 				if err != nil {
 					addFail += 1
 					fmt.Fprintf(os.Stderr, "Fail to add participant %v: %v\n", part, err)
-					Log.WriteLog(fmt.Sprintf("Fail to add participant %v: %v", part, err), 0)
+					log.WriteLog(fmt.Sprintf("Fail to add participant %v: %v", part, err), 0)
 				}
 			}
 			if addFail == len(cmParticipators) {
@@ -106,7 +106,7 @@ Usage: %v cm [-t title -p participator1, participator2, ...]`, os.Args[0]),
 					fmt.Fprintf(os.Stderr, "%v\n", err)
 				}
 				fmt.Fprintf(os.Stderr, "Fail to create meeting: no participant could be added\n")
-				Log.WriteLog("Fail to create meeting: no participant could be added", 0)
+				log.WriteLog("Fail to create meeting: no participant could be added", 0)
 			} else {
 				tmp := fmt.Sprintf("Successfully created meeting %v", cmTitle)
 				fmt.Println(tmp)
@@ -117,11 +117,11 @@ Usage: %v cm [-t title -p participator1, participator2, ...]`, os.Args[0]),
 						tmp += ", "
 					}
 				}
-				Log.WriteLog(tmp, 1)
+				log.WriteLog(tmp, 1)
 			}
 		} else {
 			fmt.Fprintf(os.Stderr, "Fail to create meeting: %v\n", err)
-			Log.WriteLog(fmt.Sprintf("user %v fail to create meeting %v, Error: %v", userInfo.Username, cmTitle, err), 0)
+			log.WriteLog(fmt.Sprintf("user %v fail to create meeting %v, Error: %v", userInfo.Username, cmTitle, err), 0)
 			return
 		}
 

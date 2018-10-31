@@ -20,7 +20,7 @@ import (
 	"os"
 
 	"github.com/SYSU532/agenda/entity"
-	"github.com/SYSU532/agenda/Log"
+	"github.com/SYSU532/agenda/log"
 	"github.com/spf13/cobra"
 )
 
@@ -35,11 +35,11 @@ var cancelmCmd = &cobra.Command{
 Usage: %v cancelm [-t title]`, os.Args[0]),
 	Run: func(cmd *cobra.Command, args []string) {
 		// Write init lOG
-		Log.WriteLog("Invoke cancel meeting command to stop the meetings you create", 1)
+		log.WriteLog("Invoke cancel meeting command to stop the meetings you create", 1)
 		userinfo, err := entity.GetCurrentUser()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Fail to cancel meeting: %v\n", err)
-			Log.WriteLog("Error when geeting current user, maybe you are not logged in", 0)
+			log.WriteLog("Error when geeting current user, maybe you are not logged in", 0)
 			return
 		}
 		reader := bufio.NewReader(os.Stdin)
@@ -52,10 +52,10 @@ Usage: %v cancelm [-t title]`, os.Args[0]),
 		err = entity.CancelMeeting(cancelmTitle, userinfo.Username)
 		if err == nil {
 			fmt.Println("Successfully canceled meeting")
-			Log.WriteLog(fmt.Sprintf("user %s successfully canceled meeting %v", userinfo.Username, cancelmTitle), 1)
+			log.WriteLog(fmt.Sprintf("user %s successfully canceled meeting %v", userinfo.Username, cancelmTitle), 1)
 		} else {
 			fmt.Fprintf(os.Stderr, "Fail to cancel meeting: %v", err)
-			Log.WriteLog(fmt.Sprintf("Fail to cancel meeting: %v", err), 0)
+			log.WriteLog(fmt.Sprintf("Fail to cancel meeting: %v", err), 0)
 			return
 		}
 

@@ -20,7 +20,7 @@ import (
 	"os"
 
 	"github.com/SYSU532/agenda/entity"
-	"github.com/SYSU532/agenda/Log"
+	"github.com/SYSU532/agenda/log"
 	"github.com/spf13/cobra"
 )
 
@@ -38,11 +38,11 @@ var addpCmd = &cobra.Command{
 	Usage: %v addp [-t title -p participator1, participator2, ...]`, os.Args[0]),
 	Run: func(cmd *cobra.Command, args []string) {
 		// Write init lOG
-		Log.WriteLog("Invoke add participant command to add persons in meeting", 1)
+		log.WriteLog("Invoke add participant command to add persons in meeting", 1)
 		userinfo, err := entity.GetCurrentUser()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Fail to add participator: %v\n", err)
-			Log.WriteLog("Error when geeting current user, maybe you are not logged in", 0)
+			log.WriteLog("Error when geeting current user, maybe you are not logged in", 0)
 			return
 		}
 		reader := bufio.NewReader(os.Stdin)
@@ -63,7 +63,7 @@ var addpCmd = &cobra.Command{
 				addpParticipators = append(addpParticipators, part)
 			}
 		}
-		Log.WriteLog(fmt.Sprintf("user %s begin to add participants into meeting %s, target participants: %v", userinfo. Username, addpTitle, addpParticipators), 1)
+		log.WriteLog(fmt.Sprintf("user %s begin to add participants into meeting %s, target participants: %v", userinfo. Username, addpTitle, addpParticipators), 1)
 		err = entity.CheckBeforeModP(addpTitle, userinfo.Username)
 		if err == nil {
 			for _, part := range addpParticipators {
@@ -71,23 +71,23 @@ var addpCmd = &cobra.Command{
 				if err != nil {
 					tmp := fmt.Sprintf("Meeting %v Fail to add participant %v: %v", addpTitle, part, err)
 					fmt.Println(tmp)
-					Log.WriteLog(tmp, 0)
+					log.WriteLog(tmp, 0)
 					continue
 				}
 				err = entity.AddPaticipant(addpTitle, part)
 				if err != nil {
 					tmp := fmt.Sprintf("Meeting %v Fail to add participant %v: %v", addpTitle, part, err)
 					fmt.Println(tmp)
-					Log.WriteLog(tmp, 0)
+					log.WriteLog(tmp, 0)
 				}
 			}
 			if err == nil {
 				fmt.Println("Successfully added participant(s)")
-				Log.WriteLog(fmt.Sprintf("user %s successfully add target participants into Meeting %v", userinfo.Username, addpTitle), 1)
+				log.WriteLog(fmt.Sprintf("user %s successfully add target participants into Meeting %v", userinfo.Username, addpTitle), 1)
 			}
 		} else {
 			fmt.Fprintf(os.Stderr, "Fail to add participant: %v\n", err)
-			Log.WriteLog(fmt.Sprintf("Fail to add participant: %v", err), 0)
+			log.WriteLog(fmt.Sprintf("Fail to add participant: %v", err), 0)
 			return
 		}
 	},
