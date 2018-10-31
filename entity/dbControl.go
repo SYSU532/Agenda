@@ -14,7 +14,7 @@ import (
 )
 
 var agendaDB *sql.DB
-var addUserStmt, deleteUserStmt, getUserByNameStmt, getUserByEmailStmt, getUserByIDStmt, getAllUserStmt *sql.Stmt
+var addUserStmt, deleteUserStmt, getUserByNameStmt, getUserByEmailStmt, getUserByPhoneStmt, getUserByIDStmt, getAllUserStmt *sql.Stmt
 var cancelMeetingStmt, quitMeetingStmt, addMeetingStmt, getPartStmt, getCreatedStmt, getTitleMeetingStmt, addPartStmt, getAllMeetingsStmt *sql.Stmt
 var getAllParticipantsStmt, clearParticipantStmt, removeParticipantStmt *sql.Stmt
 
@@ -26,6 +26,7 @@ type FindUserInfo struct {
 	uid      int
 	Username string
 	Email    string
+	Phone string
 }
 
 // Meeting structure
@@ -68,6 +69,8 @@ func init() {
 	getUserByNameStmt, err = agendaDB.Prepare(getUserByName)
 	checkErr(err)
 	getUserByEmailStmt, err = agendaDB.Prepare(getUserByEmail)
+	checkErr(err)
+	getUserByPhoneStmt, err = agendaDB.Prepare(getUserByPhone)
 	checkErr(err)
 	getUserByIDStmt, err = agendaDB.Prepare(getUserNameByID)
 	checkErr(err)
@@ -114,9 +117,9 @@ func LoginUser(username, password string) error {
 		passHash := sha256.Sum256([]byte(password))
 		hashStr := base64.URLEncoding.EncodeToString(passHash[:])
 		var uid int
-		var uname, pass, email string
+		var uname, pass, email,phone string
 		var ctime time.Time
-		err = result.Scan(&uid, &uname, &pass, &email, &ctime)
+		err = result.Scan(&uid, &uname, &pass, &email, &phone, &ctime)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			return errors.New("database scan error")
@@ -132,15 +135,15 @@ func LoginUser(username, password string) error {
 }
 
 // Create user with username and password
-func AddUser(username, password, email string) error {
-	err := checkUserDuplicate(username, email)
+func AddUser(username, password, email string, phone string) error {
+	err := checkUserDuplicate(username, email, phone)
 	if err != nil {
 		return err
 	}
 	passHash := sha256.Sum256([]byte(password))
 	hashStr := base64.URLEncoding.EncodeToString(passHash[:])
 	datetime := time.Now().Format(time.RFC3339)
-	_, err = addUserStmt.Exec(username, hashStr, email, datetime)
+	_, err = addUserStmt.Exec(username, hashStr, email, phone, datetime)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		return errors.New("database error when adding user")
@@ -149,7 +152,7 @@ func AddUser(username, password, email string) error {
 }
 
 // Check user creation is duplicate or not
-func checkUserDuplicate(username, email string) error {
+func checkUserDuplicate(username string, email string, phone string) error {
 	result, err := getUserByNameStmt.Query(username)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -159,13 +162,21 @@ func checkUserDuplicate(username, email string) error {
 	}
 	result.Close()
 	result, err = getUserByEmailStmt.Query(email)
-	defer result.Close()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 	}
 	if result.Next() {
 		return errors.New("email already exists")
 	}
+	result.Close()
+	result, err = getUserByPhoneStmt.Query(phone)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+	}
+	if result.Next() {
+		return errors.New("phone number already exists")
+	}
+	result.Close()
 	return nil
 }
 
@@ -189,7 +200,7 @@ func GetUserList(username string, email string) ([]FindUserInfo, error) {
 	var (
 		output               []FindUserInfo
 		uid                  int
-		uname, upass, uemail string
+		uname, upass, uemail, uphone string
 		utime                time.Time
 	)
 	// Start checking with conditions
@@ -201,8 +212,8 @@ func GetUserList(username string, email string) ([]FindUserInfo, error) {
 		result, err = getUserByNameStmt.Query(username)
 	}
 	for result.Next() {
-		result.Scan(&uid, &uname, &upass, &uemail, &utime)
-		output = append(output, FindUserInfo{uid: uid, Username: uname, Email: uemail})
+		result.Scan(&uid, &uname, &upass, &uemail, &uphone, &utime)
+		output = append(output, FindUserInfo{uid: uid, Username: uname, Email: uemail, Phone: uphone})
 	}
 	return output, err
 }
@@ -214,8 +225,8 @@ func ClearMeeting(username string) error {
 		return err
 	}
 	if result.Next() {
-		var usrname, pass, email, createdTime string
-		result.Scan(&uid, &usrname, &pass, &email, &createdTime)
+		var usrname, pass, email, phone, createdTime string
+		result.Scan(&uid, &usrname, &pass, &email, &phone, &createdTime)
 	}
 	result.Close()
 	for {
@@ -263,9 +274,9 @@ func QuitMeeting(title, username string) error {
 	}
 	if result.Next() {
 		var (
-			usrname, pass, email, createdTime string
+			usrname, pass, email, phone, createdTime string
 		)
-		result.Scan(&uid, &usrname, &pass, &email, &createdTime)
+		result.Scan(&uid, &usrname, &pass, &email, &phone, &createdTime)
 	}
 	result.Close()
 	flag := false
@@ -334,9 +345,9 @@ func CancelMeeting(title, username string) error {
 	}
 	if result.Next() {
 		var (
-			usrname, pass, email, createdTime string
+			usrname, pass, email, phone, createdTime string
 		)
-		result.Scan(&uid, &usrname, &pass, &email, &createdTime)
+		result.Scan(&uid, &usrname, &pass, &email, &phone, &createdTime)
 	}
 	if uid != creatorID {
 		return errors.New("you are not authorized to cancel this meeting")
@@ -363,8 +374,8 @@ func AddMeeting(title, creator string, startTime, endTime time.Time) error {
 		return err
 	}
 	if result.Next() {
-		var name, pass, email, time string
-		result.Scan(&uid, &name, &pass, &email, &time)
+		var name, pass, email, phone, time string
+		result.Scan(&uid, &name, &pass, &email, &phone, &time)
 	} else {
 		return errors.New("creator user does not exist when creating meeting")
 	}
@@ -446,8 +457,8 @@ func CheckBeforeModP(title, username string) error {
 		return err
 	}
 	if result.Next() {
-		var usrname, pass, email, createdTime string
-		result.Scan(&uid, &usrname, &pass, &email, &createdTime)
+		var usrname, pass, email, phone, createdTime string
+		result.Scan(&uid, &usrname, &pass, &email, &phone, &createdTime)
 	}
 	result.Close()
 	result, err = getTitleMeetingStmt.Query(title)
@@ -476,8 +487,8 @@ func CheckDupPart(title, part string) error {
 		return nil
 	}
 	if result.Next() {
-		var usrname, pass, email, createdTime string
-		result.Scan(&partID, &usrname, &pass, &email, &createdTime)
+		var usrname, pass, email, phone, createdTime string
+		result.Scan(&partID, &usrname, &pass, &email, &phone, &createdTime)
 	}
 	result.Close()
 	result, err = getTitleMeetingStmt.Query(title)
@@ -526,8 +537,8 @@ func RmParticipant(title, username string) error {
 		return err
 	}
 	if result.Next() {
-		var name, pass, email, time string
-		result.Scan(&uid, &name, &pass, &email, &time)
+		var name, pass, email, phone, time string
+		result.Scan(&uid, &name, &pass, &email, &phone, &time)
 	} else {
 		return errors.New("user does not exist")
 	}
@@ -589,8 +600,8 @@ func AddPaticipant(title, username string) error {
 		return err
 	}
 	if result.Next() {
-		var name, pass, email, time string
-		result.Scan(&uid, &name, &pass, &email, &time)
+		var name, pass, email, phone, time string
+		result.Scan(&uid, &name, &pass, &email, &phone, &time)
 	} else {
 		return errors.New("user does not exist")
 	}

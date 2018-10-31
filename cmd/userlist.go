@@ -45,10 +45,10 @@ Usage: %v userlist [-uUserName] [-eEmail]`, os.Args[0]),
 				Log.WriteLog("No any user satisfies your searching conditions", 0)
 			}
 		} else {
-			fmt.Printf("|%-20v|%-20v|\n", "Username", "Email")
-			fmt.Println("|--------------------|--------------------|")
+			fmt.Printf("|%-20v|%-20v|%-20v|\n", "Username", "Email", "Phone")
+			fmt.Println("|--------------------|--------------------|--------------------|")
 			for _, ele := range result {
-				fmt.Printf("|%-20v|%-20v|\n", ele.Username, ele.Email)
+				fmt.Printf("|%-20v|%-20v|%-20v|\n", ele.Username, ele.Email, ele.Phone)
 			}
 			Log.WriteLog("List users done!Print target users info....", 1)
 		}

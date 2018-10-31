@@ -14,11 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var createUserName, createUserPass, createUserEmail string
+var createUserName, createUserPass, createUserEmail, createUserPhone string
 
 const emailRegex = "^([A-Za-z0-9]+)@([a-z0-9]+)([.])([a-z]+)$"
 const usernameRegex = "^[A-Za-z0-9]+$"
 const passwordRegex = "^.{6,}$"
+const phoneRegex = "^[0-9]{11}$"
 
 func init() {
 	rootCmd.AddCommand(registerCmd)
@@ -26,6 +27,7 @@ func init() {
 	registerCmd.Flags().StringVarP(&createUserName, "username", "u", "", "The username of the new user.")
 	registerCmd.Flags().StringVarP(&createUserPass, "password", "p", "", "The password of the new user.")
 	registerCmd.Flags().StringVarP(&createUserEmail, "email", "e", "", "The email of the new user.")
+	registerCmd.Flags().StringVarP(&createUserPhone, "phone", "o", "", "The phone number of the new user.")
 }
 
 func checkFormat(origin, regexFormat string) bool {
@@ -38,7 +40,7 @@ var registerCmd = &cobra.Command{
 	Short: "Register a new user",
 	Long: fmt.Sprintf(`Register a new user with the input username, password and email.
 
-Usage: %v register -uUserName –password pass –email=a@xxx.com`, os.Args[0]),
+Usage: %v register -uUserName –pPassword –email=a@xxx.com -oXXXXXXXXXXX`, os.Args[0]),
 
 	Run: func(cmd *cobra.Command, args []string) {
 		// Write init lOG
@@ -60,10 +62,16 @@ Usage: %v register -uUserName –password pass –email=a@xxx.com`, os.Args[0]),
 			createUserEmail, _ = reader.ReadString('\n')
 			createUserEmail = createUserEmail[:len(createUserEmail)-1]
 		}
+		if createUserPhone == "" {
+			fmt.Print("Enter Phone number: ")
+			createUserPhone, _ = reader.ReadString('\n')
+			createUserPhone = createUserPhone[:len(createUserPhone)-1]
+		}
 		fmt.Println("\nCreating User...")
 		fmt.Printf("Username: %v\n", createUserName)
 		fmt.Printf("Password: %v\n", createUserPass)
 		fmt.Printf("Email: %v\n", createUserEmail)
+		fmt.Printf("Phone: %v\n", createUserPhone)
 		validFormat := true
 		if !checkFormat(createUserName, usernameRegex) {
 			fmt.Println("Username does not fit the required format!")
@@ -80,11 +88,16 @@ Usage: %v register -uUserName –password pass –email=a@xxx.com`, os.Args[0]),
 			Log.WriteLog("Regist Error: Email does not fit the required format!", 0)
 			validFormat = false
 		}
+		if !checkFormat(createUserPhone, phoneRegex) {
+			fmt.Println("Phone number does not fit the required format!")
+			Log.WriteLog("Regist Error: Phone does not fit the required format!", 0)
+			validFormat = false
+		}
 		if validFormat {
-			err := entity.AddUser(createUserName, createUserPass, createUserEmail)
+			err := entity.AddUser(createUserName, createUserPass, createUserEmail, createUserPhone)
 			if err == nil {
 				fmt.Println("Successfully created user!")
-				Log.WriteLog(fmt.Sprintf("Successfully create user %s, email %s", createUserName, createUserEmail), 1)
+				Log.WriteLog(fmt.Sprintf("Successfully create user %s, email %s, phone %s", createUserName, createUserEmail, createUserPhone), 1)
 				entity.SetCurrentUser(createUserName, createUserPass)
 				fmt.Println("Automatically login finished!")
 				Log.WriteLog(fmt.Sprintf("Login as user %s succeeded", createUserName), 1)

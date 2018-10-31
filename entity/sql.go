@@ -5,6 +5,7 @@ const initUserTable = `CREATE TABLE IF NOT EXISTS "users" (
     "username" VARCHAR(64) UNIQUE NOT NULL,
 	"password" CHAR(44) NOT NULL,
 	"email" VARCHAR(50) UNIQUE NOT NULL,
+	"phone" VARCHAR(50) UNIQUE NOT NULL,
     "createdTime" DATE NOT NULL
 );`
 
@@ -24,13 +25,15 @@ const initParticipantTable = `CREATE TABLE IF NOT EXISTS "participants"(
 	FOREIGN KEY(mid) REFERENCES meetings(mid)
 );`
 
-const addUser = `INSERT INTO users(username, password, email, createdTime) values(?, ?, ?, ?)`
+const addUser = `INSERT INTO users(username, password, email, phone, createdTime) values(?, ?, ?, ?, ?)`
 
 const deleteUser = `DELETE FROM users WHERE username=?`
 
 const getUserByName = `SELECT * FROM users WHERE username=?`
 
 const getUserByEmail = `SELECT * FROM users WHERE email=?`
+
+const getUserByPhone = `SELECT * FROM users WHERE phone=?`
 
 const getUserNameByID = `SELECT username FROM users WHERE uid=?`
 
