@@ -35,7 +35,7 @@ var rpCmd = &cobra.Command{
 	Short: "Remove participator",
 	Long: fmt.Sprintf(`Use this command to remove participators from a meeting
 	using a already logged in user.
-	Usage: %v rp [-t title -p participator1, participator2, ...]`, os.Args[0]),
+	Usage: %v rp [-t title -p participator1 -p participator2 ...]`, os.Args[0]),
 	Run: func(cmd *cobra.Command, args []string) {
 		// Write init lOG
 		log.WriteLog("Invoke remove participant command to clean special participants in your meetings", 1)

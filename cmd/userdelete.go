@@ -15,6 +15,7 @@ import (
 
 func init() {
 	rootCmd.AddCommand(userdeleteCmd)
+
 	// Do not need any pflags
 }
 

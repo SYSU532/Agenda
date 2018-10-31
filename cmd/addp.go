@@ -35,7 +35,7 @@ var addpCmd = &cobra.Command{
 	Short: "Add participator",
 	Long: fmt.Sprintf(`Use this command to add participators to a meeting
 	using a already logged in user.
-	Usage: %v addp [-t title -p participator1, participator2, ...]`, os.Args[0]),
+	Usage: %v addp [-t title -p participator1 -p participator2 ...]`, os.Args[0]),
 	Run: func(cmd *cobra.Command, args []string) {
 		// Write init lOG
 		log.WriteLog("Invoke add participant command to add persons in meeting", 1)
@@ -51,7 +51,7 @@ var addpCmd = &cobra.Command{
 			title, _ := reader.ReadString('\n')
 			addpTitle = title[:len(title)-1]
 		}
-		if len(cmParticipators) == 1 && cmParticipators[0] == "" {
+		if len(addpParticipators) == 1 && addpParticipators[0] == "" {
 			addpParticipators = []string{}
 			fmt.Print("Enter the number of participators: ")
 			var partNum uint
