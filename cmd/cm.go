@@ -110,11 +110,18 @@ Usage: %v cm [-t title -p participator1, participator2, ...]`, os.Args[0]),
 			} else {
 				tmp := fmt.Sprintf("Successfully created meeting %v", cmTitle)
 				fmt.Println(tmp)
+				tmp = fmt.Sprintf("user %v successfully created meeting %v, with startTime: %v, endTime: %v, participants: ",userInfo.Username, cmTitle, start, end)
+				for i, part := range cmParticipators {
+					tmp += part
+					if i != len(cmParticipators)-1 {
+						tmp += ", "
+					}
+				}
 				Log.WriteLog(tmp, 1)
 			}
 		} else {
 			fmt.Fprintf(os.Stderr, "Fail to create meeting: %v\n", err)
-			Log.WriteLog(fmt.Sprintf("Fail to create meeting: %v", err), 0)
+			Log.WriteLog(fmt.Sprintf("user %v fail to create meeting %v, Error: %v", userInfo.Username, cmTitle, err), 0)
 			return
 		}
 

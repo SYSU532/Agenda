@@ -42,10 +42,10 @@ Usage: %v clearm `, os.Args[0]),
 		err = entity.ClearMeeting(userinfo.Username)
 		if err == nil {
 			fmt.Println("Successfully cleared all the meetings")
-			Log.WriteLog("Successfully cleared all the meetings", 1)
+			Log.WriteLog(fmt.Sprintf("user %s successfully cleared all the meetings", userinfo.Username), 1)
 		} else {
 			fmt.Fprintf(os.Stderr, "Fail to clear all meetings: %v", err)
-			Log.WriteLog(fmt.Sprintf("Fail to clear all meetings: %v", err), 0)
+			Log.WriteLog(fmt.Sprintf("user %s fail to clear all meetings", userinfo.Username), 0)
 			return
 		}
 	},

@@ -63,6 +63,7 @@ var addpCmd = &cobra.Command{
 				addpParticipators = append(addpParticipators, part)
 			}
 		}
+		Log.WriteLog(fmt.Sprintf("user %s begin to add participants into meeting %s, target participants: %v", userinfo. Username, addpTitle, addpParticipators), 1)
 		err = entity.CheckBeforeModP(addpTitle, userinfo.Username)
 		if err == nil {
 			for _, part := range addpParticipators {
@@ -82,7 +83,7 @@ var addpCmd = &cobra.Command{
 			}
 			if err == nil {
 				fmt.Println("Successfully added participant(s)")
-				Log.WriteLog(fmt.Sprintf("Successfully add participant into Meeting %v", addpTitle), 1)
+				Log.WriteLog(fmt.Sprintf("user %s successfully add target participants into Meeting %v", userinfo.Username, addpTitle), 1)
 			}
 		} else {
 			fmt.Fprintf(os.Stderr, "Fail to add participant: %v\n", err)

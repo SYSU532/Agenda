@@ -20,6 +20,7 @@ import (
 	"os"
 
 	"github.com/SYSU532/agenda/entity"
+	"github.com/SYSU532/agenda/Log"
 	"github.com/spf13/cobra"
 )
 
@@ -36,9 +37,12 @@ var rpCmd = &cobra.Command{
 	using a already logged in user.
 	Usage: %v rp [-t title -p participator1, participator2, ...]`, os.Args[0]),
 	Run: func(cmd *cobra.Command, args []string) {
+		// Write init lOG
+		Log.WriteLog("Invoke remove participant command to clean special participants in your meetings", 1)
 		userinfo, err := entity.GetCurrentUser()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Fail to remove participator: %v\n", err)
+			Log.WriteLog("Error when geeting current user, maybe you are not logged in", 0)
 			return
 		}
 		reader := bufio.NewReader(os.Stdin)
@@ -59,19 +63,25 @@ var rpCmd = &cobra.Command{
 				rpParticipators = append(rpParticipators, part)
 			}
 		}
+		Log.WriteLog(fmt.Sprintf("user %s begin to remove participants from meeting %s, target participants: %v", userinfo. Username, rpTitle, rpParticipators), 1)
 		err = entity.CheckBeforeModP(rpTitle, userinfo.Username)
 		if err == nil {
 			for _, part := range rpParticipators {
 				err = entity.RmParticipant(rpTitle, part)
 				if err != nil {
-					fmt.Printf("Fail to remove participant %v: %v\n", part, err)
+					tmp := fmt.Sprintf("Fail to remove participant %v: %v", part, err)
+					fmt.Println(tmp)
+					Log.WriteLog(tmp, 0)
 				}
 			}
 			if err == nil {
 				fmt.Println("Successfully removed participant(s)")
+				Log.WriteLog("Successfully removed participant(s)", 1)
 			}
 		} else {
-			fmt.Fprintf(os.Stderr, "Fail to remove participant: %v\n", err)
+			tmp := fmt.Sprintf("Fail to remove participant %v", err)
+			fmt.Fprintf(os.Stderr, tmp, "\n")
+			Log.WriteLog(tmp, 0)
 			return
 		}
 	},

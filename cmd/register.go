@@ -84,9 +84,10 @@ Usage: %v register -uUserName –password pass –email=a@xxx.com`, os.Args[0]),
 			err := entity.AddUser(createUserName, createUserPass, createUserEmail)
 			if err == nil {
 				fmt.Println("Successfully created user!")
-				Log.WriteLog(fmt.Sprintf("Successfully create user %s", createUserName), 1)
+				Log.WriteLog(fmt.Sprintf("Successfully create user %s, email %s", createUserName, createUserEmail), 1)
 				entity.SetCurrentUser(createUserName, createUserPass)
 				fmt.Println("Automatically login finished!")
+				Log.WriteLog(fmt.Sprintf("Login as user %s succeeded", createUserName), 1)
 			} else {
 				fmt.Println(err)
 				fmt.Println("FAIL to create user!")

@@ -50,7 +50,7 @@ var loginCmd = &cobra.Command{
 			Log.WriteLog(fmt.Sprintf("Fail to login: %v\n", err), 0)
 			os.Exit(0)
 		}
-		logMess := fmt.Sprintf("Login as user %v succeeded.", loginUsername)
+		logMess := fmt.Sprintf("Login as user %v succeeded", loginUsername)
 		fmt.Println(logMess)
 		Log.WriteLog(logMess, 1)
 	},

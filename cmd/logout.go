@@ -44,7 +44,7 @@ Usage: %v logout`, os.Args[0]),
 			Log.WriteLog(fmt.Sprintf("Error when logging out: %v", err), 0)
 			return
 		}
-		logMess := fmt.Sprintf("Successfully log out from %v", info.Username)
+		logMess := fmt.Sprintf("user successfully log out from %v", info.Username)
 		fmt.Println(logMess)
 		Log.WriteLog(logMess, 1)
 	},
