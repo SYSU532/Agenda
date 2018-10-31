@@ -49,6 +49,12 @@ Usage: %v fm [-t title -s startTime -e endTime]`, os.Args[0]),
 		)
 		format := "2006-01-02 15:04"
 		reader := bufio.NewReader(os.Stdin)
+		_, err0 := entity.GetCurrentUser()
+		if err0 != nil {
+			fmt.Fprintf(os.Stderr, "Fail to find meetings: %v\n", err0)
+			Log.WriteLog("Error when geeting current user, maybe you are not logged in", 0)
+			return
+		}
 		// If user do enter title, just search with title
 		if fmTitle != "" {
 			result, err = entity.FindMeetingByTitle(fmTitle)

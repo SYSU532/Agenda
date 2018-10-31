@@ -50,3 +50,35 @@
 2018-10-31 11:40:33 [Info] Login as user re succeeded
 2018-10-31 11:40:38 [Info] Invoke user list command to list all users in agenda system
 2018-10-31 11:40:38 [Info] List users done!Print target users info....
+2018-10-31 14:28:11 [Info] Invoke log out command to sign out current user
+2018-10-31 14:28:11 [Info] user successfully log out from re
+2018-10-31 14:28:39 [Info] Invoke add participant command to add persons in meeting
+2018-10-31 14:28:39 [Error] Error when geeting current user, maybe you are not logged in
+2018-10-31 14:28:45 [Info] Invoke cancel meeting command to stop the meetings you create
+2018-10-31 14:28:45 [Error] Error when geeting current user, maybe you are not logged in
+2018-10-31 14:28:50 [Info] Invoke clear meeting command to stop all the meetings you create
+2018-10-31 14:28:50 [Error] Error when geeting current user, maybe you are not logged in
+2018-10-31 14:28:53 [Info] Invoke create meeting command to create special meeting with others
+2018-10-31 14:28:53 [Error] Error when geeting current user, maybe you are not logged in
+2018-10-31 14:28:56 [Info] Invoke find meeting command to search conditional meetings you create or join in
+2018-10-31 14:33:33 [Info] Invoke quit meeting command to quit joining in some meetings
+2018-10-31 14:33:33 [Error] Error when geeting current user, maybe you are not logged in
+2018-10-31 14:33:39 [Info] Invoke remove participant command to clean special participants in your meetings
+2018-10-31 14:33:39 [Error] Error when geeting current user, maybe you are not logged in
+2018-10-31 14:33:45 [Info] Invoke delete user command to delete user itself
+2018-10-31 14:33:45 [Error] Error with deleting current user 
+2018-10-31 14:33:51 [Info] Invoke user list command to list all users in agenda system
+2018-10-31 14:33:51 [Info] List users done!Print target users info....
+2018-10-31 14:34:06 [Info] Invoke find meeting command to search conditional meetings you create or join in
+2018-10-31 14:35:42 [Info] Invoke find meeting command to search conditional meetings you create or join in
+2018-10-31 14:35:42 [Error] Error when geeting current user, maybe you are not logged in
+2018-10-31 14:35:58 [Info] Invoke find meeting command to search conditional meetings you create or join in
+2018-10-31 14:35:58 [Error] Error when geeting current user, maybe you are not logged in
+2018-10-31 14:36:17 [Info] Invoke find meeting command to search conditional meetings you create or join in
+2018-10-31 14:36:17 [Error] Error when geeting current user, maybe you are not logged in
+2018-10-31 14:37:13 [Info] Invoke find meeting command to search conditional meetings you create or join in
+2018-10-31 14:37:13 [Error] Error when geeting current user, maybe you are not logged in
+2018-10-31 14:37:24 [Info] Invoke user list command to list all users in agenda system
+2018-10-31 14:37:24 [Error] Error when geeting current user, maybe you are not logged in
+2018-10-31 14:37:41 [Info] Invoke user list command to list all users in agenda system
+2018-10-31 14:37:41 [Error] Error when geeting current user, maybe you are not logged in

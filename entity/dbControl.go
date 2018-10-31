@@ -629,7 +629,10 @@ func FindMeetingByTitle(title string) ([]Meeting, error) {
 		output []Meeting
 		inFlag bool = false
 	)
-	curInfo, _ := GetCurrentUser()
+	curInfo, err0 := GetCurrentUser()
+	if err0 != nil {
+		return output, errors.New("fail to find meetings: no current user")
+	}
 	curName := curInfo.Username
 	format := "2006-01-02 15:04"
 	result, err := getTitleMeetingStmt.Query(title)
@@ -697,7 +700,10 @@ func FindMeetingsByTimeInterval(start, end time.Time) ([]Meeting, error) {
 		tempMid, tempCid          []int
 		count                     int = 0
 	)
-	curInfo, _ := GetCurrentUser()
+	curInfo, err0 := GetCurrentUser()
+	if err0 != nil {
+		return output, errors.New("fail to find meetings: no current user")
+	}
 	curName := curInfo.Username
 	format := "2006-01-02 15:04"
 	result, _ := getAllMeetingsStmt.Query()

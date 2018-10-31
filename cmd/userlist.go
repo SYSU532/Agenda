@@ -32,6 +32,12 @@ Usage: %v userlist [-uUserName] [-eEmail]`, os.Args[0]),
 	Run: func(cmd *cobra.Command, args []string) {
 		// Write init lOG
 		Log.WriteLog("Invoke user list command to list all users in agenda system", 1)
+		_, err0 := entity.GetCurrentUser()
+		if err0 != nil {
+			fmt.Fprintf(os.Stderr, "Fail to list all users: you are not in loggin state!\n")
+			Log.WriteLog("Error when geeting current user, maybe you are not logged in", 0)
+			return
+		}
 		result, err := entity.GetUserList(targetUserName, targetEmail)
 		if err != nil {
 			fmt.Println("FAIL to print user list!")
