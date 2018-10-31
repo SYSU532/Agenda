@@ -21,7 +21,10 @@ var loginUsername, loginPassword string
 var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Login User.",
-	Long:  `Login user in order to perform operations like creating meetings, view current meetings, etc.`,
+	Long:  fmt.Sprintf(`Login user in order to perform operations like creating meetings, view current meetings, etc.
+
+Usage: %v login [-u username] [-p password]`, os.Args[0]),
+
 	Run: func(cmd *cobra.Command, args []string) {
 		// Write init lOG
 		log.WriteLog("Invoke log in command to log user with username and password", 1)

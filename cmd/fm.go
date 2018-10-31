@@ -38,7 +38,7 @@ var fmCmd = &cobra.Command{
 	Short: "Find meeting within speical conditions",
 	Long: fmt.Sprintf(`Find special meetings within input range that has association with the login user.
 
-Usage: %v fm [-t title -s startTime -e endTime]`, os.Args[0]),
+Usage: %v fm [-t title] [-s startTime] [-e endTime]`, os.Args[0]),
 
 	Run: func(cmd *cobra.Command, args []string) {
 		// Write init lOG

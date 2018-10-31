@@ -40,7 +40,7 @@ var registerCmd = &cobra.Command{
 	Short: "Register a new user",
 	Long: fmt.Sprintf(`Register a new user with the input username, password and email.
 
-Usage: %v register -uUserName –pPassword –email=a@xxx.com -oXXXXXXXXXXX`, os.Args[0]),
+Usage: %v register [-uUserName] [–pPassword] [–email=a@xxx.com] [-oXXXXXXXXXXX]`, os.Args[0]),
 
 	Run: func(cmd *cobra.Command, args []string) {
 		// Write init lOG
