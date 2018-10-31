@@ -36,3 +36,17 @@
 2018-10-31 11:35:03 [Info] Successfully removed participant(s)
 2018-10-31 11:35:08 [Info] Invoke find meeting command to search conditional meetings you create or join in
 2018-10-31 11:35:08 [Error] No any meeting you create or join satisfies the searching conditions!
+2018-10-31 11:39:53 [Info] Invoke log out command to sign out current user
+2018-10-31 11:39:53 [Info] user successfully log out from re
+2018-10-31 11:39:57 [Info] Invoke log in command to log user with username and password
+2018-10-31 11:40:01 [Info] Login as user qwe succeeded
+2018-10-31 11:40:07 [Info] Invoke clear meeting command to stop all the meetings you create
+2018-10-31 11:40:07 [Info] user qwe successfully cleared all the meetings
+2018-10-31 11:40:22 [Info] Invoke delete user command to delete user itself
+2018-10-31 11:40:22 [Info] Successfully delete current user qwe
+2018-10-31 11:40:27 [Info] Invoke log out command to sign out current user
+2018-10-31 11:40:27 [Error] You are currently not login!
+2018-10-31 11:40:30 [Info] Invoke log in command to log user with username and password
+2018-10-31 11:40:33 [Info] Login as user re succeeded
+2018-10-31 11:40:38 [Info] Invoke user list command to list all users in agenda system
+2018-10-31 11:40:38 [Info] List users done!Print target users info....
