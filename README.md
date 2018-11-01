@@ -1,4 +1,5 @@
 # Agenda
+[![Build Status](https://travis-ci.org/SYSU532/agenda.svg?branch=master)](https://travis-ci.org/SYSU532/agenda)
 
 An command line agenda management app written with golang.
 
