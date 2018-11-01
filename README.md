@@ -1,4 +1,4 @@
-#Agenda
+# Agenda
 
 An command line agenda management app written with golang.
 
